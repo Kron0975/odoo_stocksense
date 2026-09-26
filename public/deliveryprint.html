@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockSense — Delivery Operations</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#101010;
+  --panel:#111111;
+  --panel2:#171717;
+  --panel3:#1d1d1d;
+  --line:#ff7777;
+  --line-soft:#5c3535;
+  --text:#f4eeee;
+  --muted:#a89a9a;
+  --accent:#ff7777;
+  --accent2:#ff8d8d;
+  --green:#64d6a1;
+  --yellow:#f4c66a;
+  --blue:#78b9ff;
+  --danger:#ff5e6c;
+  --shadow:0 12px 35px rgba(0,0,0,.28);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{
+  font-family:Inter,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#0e0e0e}
+::-webkit-scrollbar-thumb{background:#393939;border-radius:10px}
+
+/* ================= AUTH ================= */
+#auth{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(255,119,119,.08),transparent 32%),
+    radial-gradient(circle at 90% 90%,rgba(255,119,119,.05),transparent 32%),
+    #101010;
+}
+.auth-card{
+  width:100%;
+  max-width:410px;
+  background:#151515;
+  border:1px solid #333;
+  border-radius:16px;
+  padding:34px 30px;
+  display:none;
+  box-shadow:var(--shadow);
+}
+.auth-card.show{display:block}
+.auth-brand{display:flex;align-items:center;gap:10px;margin-bottom:25px}
+.auth-brand .mark{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  color:#160707;font-weight:800;
+}
+.auth-brand span{font-family:"Space Grotesk";font-size:18px;font-weight:700}
+.auth-card h1{font-family:"Space Grotesk";font-size:22px;margin:0 0 7px}
+.auth-card .sub{color:var(--muted);font-size:13px;margin:0 0 23px;line-height:1.5}
+.field{margin-bottom:15px}
+.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+.field input,.field select{
+  width:100%;
+  background:#1d1d1d;
+  color:var(--text);
+  border:1px solid #363636;
+  border-radius:8px;
+  padding:11px 12px;
+  outline:none;
+}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.pwd-wrap{position:relative}
+.pwd-wrap .toggle-eye{
+  position:absolute;right:11px;top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);font-size:12px;cursor:pointer;
+}
+.btn-primary{
+  width:100%;padding:12px;border:0;border-radius:8px;
+  background:var(--accent);color:#170707;font-weight:700;
+}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-link{border:0;background:none;color:var(--accent);padding:0;font-size:13px}
+.auth-foot{text-align:center;color:var(--muted);font-size:13px;margin-top:18px}
+.hint{margin-top:17px;padding-top:13px;border-top:1px solid #303030;color:var(--muted);font-size:11.5px}
+.hint b{color:var(--text)}
+.msg{min-height:18px;margin-top:8px;font-size:12.5px}
+.msg.err{color:var(--danger)}
+.msg.ok{color:var(--green)}
+.otp-row{display:flex;gap:8px;margin-bottom:14px}
+.otp-row input{text-align:center;font-size:19px;padding:11px 0}
+
+/* ================= APP ================= */
+#app{display:none;min-height:100vh}
+.app-shell{min-height:100vh;display:flex}
+
+/* sidebar */
+.sidebar{
+  width:235px;
+  position:fixed;
+  left:0;top:0;bottom:0;
+  background:#0f0f0f;
+  border-right:1px solid #272727;
+  padding:18px 13px;
+  display:flex;
+  flex-direction:column;
+  z-index:30;
+}
+.brand{
+  display:flex;align-items:center;gap:10px;
+  padding:2px 9px 26px;
+  font-family:"Space Grotesk";
+  font-size:17px;font-weight:700;
+}
+.brand-mark{
+  width:27px;height:27px;border-radius:7px;
+  background:var(--accent);
+  position:relative;
+}
+.brand-mark:before,.brand-mark:after{
+  content:"";position:absolute;background:#1a0909;border-radius:2px;
+}
+.brand-mark:before{width:5px;height:18px;left:7px;top:4px;transform:rotate(25deg)}
+.brand-mark:after{width:5px;height:12px;right:6px;bottom:4px;transform:rotate(25deg)}
+
+.nav{display:flex;flex-direction:column;gap:3px;flex:1}
+.nav-item{
+  border:0;background:transparent;
+  color:#918585;
+  display:flex;align-items:center;gap:11px;
+  padding:11px 12px;border-radius:8px;
+  text-align:left;font-size:13.5px;
+}
+.nav-item:hover{color:#fff;background:#171717}
+.nav-item.active{color:#fff;background:#1b1b1b}
+.nav-icon{width:18px;text-align:center;font-size:15px}
+.logout{
+  border:1px solid #353535;background:#141414;color:#9f9292;
+  padding:10px 12px;border-radius:8px;text-align:left;
+  display:flex;align-items:center;gap:11px;
+}
+.logout:hover{color:#fff;border-color:#666}
+
+/* main */
+.main{
+  margin-left:235px;
+  min-height:100vh;
+  width:calc(100% - 235px);
+}
+.topbar{
+  height:62px;
+  border-bottom:1px solid #292929;
+  display:flex;align-items:center;justify-content:flex-end;
+  padding:0 26px;
+  gap:15px;
+  background:#111;
+  position:sticky;top:0;z-index:20;
+}
+.user-area{position:relative;display:flex;align-items:center;gap:10px;font-size:13px}
+.user-trigger{
+  display:flex;align-items:center;gap:10px;border:0;background:transparent;
+  color:var(--text);padding:4px 6px;border-radius:8px;
+}
+.user-trigger:hover{background:#1a1a1a}
+.avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--accent);color:#1b0909;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:12px;
+}
+.user-chevron{font-size:10px;color:#777;transition:.15s}
+.user-area.open .user-chevron{transform:rotate(180deg)}
+.account-menu{
+  position:absolute;right:0;top:48px;width:270px;
+  background:#151515;border:1px solid #3a3a3a;border-radius:11px;
+  padding:8px;box-shadow:0 18px 45px rgba(0,0,0,.48);
+  display:none;z-index:100;
+}
+.account-menu.show{display:block}
+.account-head{display:flex;align-items:center;gap:10px;padding:11px 10px 12px;border-bottom:1px solid #2b2b2b;margin-bottom:6px}
+.account-head .mini-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#190808;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.account-head strong{display:block;font-size:13px}
+.account-head span{display:block;color:#777;font-size:10.5px;margin-top:3px;max-width:175px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-action{
+  width:100%;border:0;background:transparent;color:#c7baba;
+  display:flex;align-items:center;gap:10px;text-align:left;
+  padding:10px;border-radius:7px;font-size:12.5px;
+}
+.account-action:hover{background:#202020;color:#fff}
+.account-action .action-icon{width:18px;text-align:center;color:var(--accent)}
+.account-divider{height:1px;background:#2b2b2b;margin:5px 0}
+.account-action.danger{color:#ff7d86}
+.account-action.danger .action-icon{color:#ff7d86}
+.menu-btn{
+  display:none;border:0;background:#191919;color:#ddd;
+  width:38px;height:38px;border-radius:8px;
+}
+.page{
+  padding:27px 31px 45px;
+  max-width:1450px;
+  margin:auto;
+}
+.page-title{
+  font-family:"Space Grotesk";
+  font-size:24px;margin:0 0 5px;
+}
+.page-desc{color:var(--muted);font-size:13px;margin:0 0 23px}
+
+/* dashboard */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:20px;
+}
+.stat-card{
+  background:#151515;border:1px solid #2c2c2c;border-radius:11px;padding:18px;
+}
+.stat-label{color:var(--muted);font-size:12px}
+.stat-value{font-family:"Space Grotesk";font-size:27px;font-weight:700;margin-top:7px}
+.stat-meta{font-size:11px;color:#777;margin-top:5px}
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:1.45fr 1fr;
+  gap:15px;
+}
+.card{
+  background:#141414;border:1px solid #2c2c2c;border-radius:11px;padding:18px;
+}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:"Space Grotesk";font-size:15px;font-weight:600}
+.card-sub{color:var(--muted);font-size:11px}
+.chart{
+  height:235px;
+  display:flex;align-items:flex-end;gap:14px;
+  padding:10px 4px 0;
+  border-bottom:1px solid #292929;
+  background:
+    repeating-linear-gradient(
+      to top,
+      transparent 0,
+      transparent 46px,
+      rgba(255,255,255,.035) 47px
+    );
+}
+.bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:8px}
+.bar{
+  width:min(42px,75%);
+  background:linear-gradient(to top,#a84d4d,var(--accent));
+  border-radius:5px 5px 0 0;
+  min-height:14px;
+}
+.bar-label{font-size:10px;color:#777}
+.activity-list{display:flex;flex-direction:column;gap:10px}
+.activity{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 0;border-bottom:1px solid #262626;
+}
+.activity:last-child{border-bottom:0}
+.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+.activity-main{flex:1}
+.activity-main strong{display:block;font-size:12.5px;font-weight:600}
+.activity-main span{display:block;font-size:10.5px;color:#777;margin-top:3px}
+.activity-time{font-size:10px;color:#777}
+
+/* ================= OPERATIONS / DELIVERY ================= */
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:15px;margin-bottom:10px;
+}
+.section-title{
+  display:flex;align-items:center;gap:16px;
+}
+.section-title h2{
+  font-family:"Space Grotesk";font-size:23px;margin:0;
+}
+.new-btn{
+  background:transparent;
+  color:var(--accent);
+  border:1px solid var(--accent);
+  border-radius:7px;
+  padding:7px 18px;
+  font-family:"Space Grotesk";
+  font-weight:600;
+}
+.new-btn:hover{background:rgba(255,119,119,.1)}
+.toolbar{
+  display:flex;align-items:center;gap:8px;
+  border-bottom:3px solid var(--accent);
+  padding-bottom:5px;
+}
+.search-box{
+  width:36px;height:32px;border:1px solid var(--accent);
+  border-radius:7px;background:transparent;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.search-box.open{width:240px;justify-content:flex-start;padding:0 9px;gap:6px}
+.search-box input{
+  width:100%;border:0;outline:0;background:transparent;color:#fff;
+  display:none;font-size:12px;
+}
+.search-box.open input{display:block}
+.view-btn{
+  width:36px;height:32px;border:1px solid var(--accent);
+  border-radius:7px;background:transparent;color:var(--accent);
+}
+.view-btn.active{background:rgba(255,119,119,.13)}
+.delivery-table-wrap{
+  border:1px solid var(--accent);
+  border-top:0;
+  border-radius:0 0 10px 10px;
+  overflow:hidden;
+}
+.delivery-table{
+  width:100%;border-collapse:collapse;
+  min-width:760px;
+}
+.delivery-table th{
+  text-align:left;padding:9px 9px;
+  color:#e8dede;font-size:12px;font-weight:500;
+  border-bottom:2px solid var(--accent);
+}
+.delivery-table td{
+  padding:10px 9px;
+  font-size:12.5px;
+  border-bottom:1px solid var(--line-soft);
+}
+.delivery-table tbody tr:hover{background:#181818}
+.delivery-table tbody tr:last-child td{border-bottom:0}
+.ref{color:var(--accent2);font-weight:600}
+.status{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;
+}
+.status:before{
+  content:"";width:7px;height:7px;border-radius:50%;background:currentColor;
+}
+.status.ready{color:var(--green)}
+.status.scheduled{color:var(--blue)}
+.status.progress{color:var(--yellow)}
+.status.delivered{color:#a9a9a9}
+
+.kanban{
+  display:none;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  border:1px solid var(--accent);
+  border-top:0;
+  padding:13px;
+  border-radius:0 0 10px 10px;
+}
+.kanban.show{display:grid}
+.k-column{background:#151515;border:1px solid #2e2e2e;border-radius:9px;padding:10px;min-height:320px}
+.k-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px}
+.k-count{color:#777}
+.k-card{
+  border:1px solid #343434;background:#1b1b1b;border-radius:8px;
+  padding:11px;margin-bottom:8px;
+}
+.k-card .ref{font-size:11px}
+.k-card p{font-size:11px;margin:6px 0;color:#ddd}
+.k-card small{font-size:10px;color:#777}
+
+.empty{
+  padding:70px 20px;text-align:center;color:#777;
+}
+
+/* ================= PRODUCTS / MOVES ================= */
+.data-card{
+  background:#141414;border:1px solid #2c2c2c;border-radius:11px;overflow:auto;
+}
+.simple-table{width:100%;border-collapse:collapse;min-width:650px}
+.simple-table th,.simple-table td{
+  text-align:left;padding:13px 15px;border-bottom:1px solid #292929;font-size:12.5px;
+}
+.simple-table th{color:#918585;font-weight:500}
+.simple-table td{color:#e5dddd}
+
+.product-clickable{cursor:pointer;transition:.12s}
+.product-clickable:hover{background:#191919}
+.stock-cell{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.stock-update{border:1px solid #555;background:#1b1b1b;color:#ddd;border-radius:5px;padding:4px 7px;font-size:10px;cursor:pointer}
+.stock-update:hover{border-color:var(--accent);color:#fff}
+.stock-menu{position:absolute;z-index:40;background:#181818;border:1px solid var(--accent);border-radius:7px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.45);display:none;min-width:130px}
+.stock-menu.show{display:block}
+.stock-menu button{display:block;width:100%;text-align:left;background:transparent;border:0;color:#ddd;padding:7px 8px;border-radius:4px;font-size:11px}
+.stock-menu button:hover{background:#242424;color:#fff}
+.badge.instock{color:var(--green)}
+.badge.lowstock{color:var(--yellow)}
+.badge.outstock{color:var(--danger)}
+.badge{
+  padding:4px 8px;border-radius:5px;background:#222;color:#aaa;font-size:10px;
+}
+
+/* ================= SETTINGS / PROFILE ================= */
+.panel{
+  background:#141414;border:1px solid #2c2c2c;border-radius:11px;
+  padding:20px;max-width:650px;margin-bottom:16px;
+}
+.panel h3{
+  font-family:"Space Grotesk";font-size:15px;margin:0 0 18px;
+  padding-bottom:12px;border-bottom:1px solid #2b2b2b;
+}
+.row2{display:flex;gap:12px}
+.row2 .field{flex:1}
+.btn-save{
+  background:var(--accent);color:#180808;border:0;border-radius:7px;
+  padding:10px 17px;font-weight:700;font-size:13px;
+}
+.toggle-list{display:flex;flex-direction:column;gap:15px}
+.toggle-item{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.t-label{display:block;font-size:13px}
+.t-desc{display:block;color:#777;font-size:11px;margin-top:3px}
+.switch{width:38px;height:22px;border-radius:20px;border:1px solid #444;background:#222;position:relative;flex:none}
+.switch .knob{position:absolute;width:16px;height:16px;border-radius:50%;left:2px;top:2px;background:#777;transition:.15s}
+.switch.on{border-color:var(--accent);background:rgba(255,119,119,.18)}
+.switch.on .knob{left:18px;background:var(--accent)}
+.profile-head{display:flex;align-items:center;gap:15px;margin-bottom:22px}
+.big-avatar{
+  width:62px;height:62px;border-radius:50%;
+  background:var(--accent);color:#190808;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Space Grotesk";font-size:21px;font-weight:700;
+}
+.profile-head h3{margin:0 0 4px;font-family:"Space Grotesk"}
+.profile-head p{margin:0;color:#777;font-size:12px}
+
+/* ================= MODAL ================= */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);
+  z-index:100;align-items:center;justify-content:center;padding:20px;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  width:100%;max-width:510px;background:#151515;
+  border:1px solid var(--accent);border-radius:12px;padding:22px;
+  box-shadow:0 25px 70px rgba(0,0,0,.5);
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-head h3{font-family:"Space Grotesk";margin:0;font-size:18px}
+.close{
+  width:30px;height:30px;border:1px solid #444;background:#1b1b1b;
+  color:#bbb;border-radius:7px;
+}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:15px}
+.btn-secondary{
+  border:1px solid #444;background:#1c1c1c;color:#ddd;
+  border-radius:7px;padding:9px 15px;
+}
+
+/* toast */
+.toast{
+  position:fixed;right:22px;bottom:22px;
+  background:#191919;border:1px solid var(--accent);
+  color:#eee;padding:11px 15px;border-radius:8px;
+  font-size:12px;opacity:0;transform:translateY(10px);
+  pointer-events:none;transition:.2s;z-index:200;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+
+/* ================= DELIVERY DETAIL / NEW TAB ================= */
+.reference-link{
+  color:var(--accent2);
+  font-weight:700;
+  border:0;
+  background:none;
+  padding:0;
+  text-decoration:none;
+  cursor:pointer;
+  font-size:inherit;
+}
+.reference-link:hover{text-decoration:underline}
+
+.k-card .reference-link{font-size:11px}
+
+/* ================= SAME-PAGE DELIVERY DETAIL ================= */
+.same-page-detail{
+  border:1px solid var(--accent);
+  border-radius:0 0 12px 12px;
+  background:#111;
+  overflow:hidden;
+  margin-top:10px;
+}
+.same-detail-titlebar{
+  display:flex;align-items:center;gap:14px;padding:12px 15px;
+  border-bottom:2px solid var(--accent);
+}
+.same-detail-title{font-family:"Space Grotesk";font-size:22px;font-weight:700}
+.detail-back-btn{
+  border:1px solid var(--accent);background:transparent;color:var(--accent);
+  border-radius:7px;padding:7px 15px;font-weight:600;cursor:pointer;
+}
+.detail-back-btn:hover{background:rgba(255,119,119,.1)}
+.detail-actions{
+  display:flex;align-items:center;gap:8px;padding:10px 15px;
+  border-bottom:1px solid var(--accent);flex-wrap:wrap;
+}
+.detail-action{
+  border:1px solid var(--accent);background:transparent;color:var(--accent);
+  border-radius:7px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;
+}
+.detail-action.primary{background:var(--accent);color:#180707}
+.detail-action:hover{filter:brightness(1.08)}
+.detail-stepper{
+  margin-left:auto;border:1px solid var(--accent);border-radius:7px;
+  padding:7px 13px;font-size:11px;white-space:nowrap;
+}
+.detail-info{padding:22px 30px;border-bottom:1px solid var(--accent)}
+.detail-reference{
+  font-family:"Space Grotesk";font-size:20px;color:var(--accent);
+  font-weight:700;margin-bottom:20px;
+}
+.detail-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 70px}
+.detail-field label{display:block;color:#d9cccc;font-size:11px;margin-bottom:6px}
+.detail-field input,.detail-field select,.detail-field textarea{
+  width:100%;background:transparent;color:#eee;border:0;
+  border-bottom:2px solid var(--accent);padding:7px 0;outline:none;
+}
+.detail-field input::placeholder,.detail-field textarea::placeholder{color:#665b5b}
+.detail-field select option{background:#181818;color:#eee}
+.detail-products{border-bottom:1px solid var(--accent)}
+.detail-products-title{
+  padding:10px 15px;color:var(--accent);font-family:"Space Grotesk";
+  border-bottom:1px solid var(--accent);
+}
+.detail-product-table{width:100%;border-collapse:collapse}
+.detail-product-table th,.detail-product-table td{
+  padding:10px 15px;text-align:left;border-bottom:1px solid var(--line-soft);font-size:12px;
+}
+.detail-product-table th{color:#ddd}
+.detail-product-table input,.detail-product-table select{
+  background:transparent;color:#eee;border:0;border-bottom:1px solid #744444;
+  padding:5px;outline:none;width:100%;
+}
+.detail-product-table option{background:#181818;color:#eee}
+.detail-stock-ok{color:var(--green)}
+.detail-stock-bad{color:var(--danger);font-weight:700}
+.detail-stock-bad-row td{color:var(--danger)!important}
+.detail-remove{
+  border:0;background:transparent;color:#777;font-size:18px;cursor:pointer;
+}
+.detail-remove:hover{color:var(--danger)}
+.detail-add-product{
+  padding:10px 15px;color:var(--accent);font-size:11px;cursor:pointer;
+  border-bottom:1px solid var(--line-soft);
+}
+.detail-add-product:hover{background:#181818}
+.detail-warning{
+  display:none;margin:10px 15px;padding:9px 11px;border:1px solid var(--danger);
+  border-radius:6px;color:#ff9a9f;background:rgba(255,94,108,.06);font-size:11px;
+}
+.detail-warning.show{display:block}
+.detail-notes{padding:18px 30px;border-bottom:1px solid var(--accent)}
+.detail-footer{
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;color:#777;font-size:10px;
+}
+.detail-footer-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){
+  .detail-form-grid{grid-template-columns:1fr;gap:15px}
+  .detail-stepper{margin-left:0}
+  .detail-info,.detail-notes{padding-left:16px;padding-right:16px}
+  .detail-product-table{min-width:650px}
+  .detail-products{overflow:auto}
+}
+
+
+/* responsive */
+
+/* clickable dashboard cards and inline summaries */
+.stat-clickable{
+  width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
+}
+.stat-clickable:hover{transform:translateY(-2px);border-color:var(--accent);background:#191919}
+.stat-clickable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dashboard-summary{
+  background:#141414;border:1px solid var(--accent);border-radius:11px;
+  margin:-4px 0 20px;padding:18px;animation:summaryIn .18s ease;
+}
+@keyframes summaryIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.summary-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:15px}
+.summary-head h3{font-family:"Space Grotesk";font-size:16px;margin:0}
+.summary-head span{font-size:11px;color:var(--muted)}
+.summary-close{border:1px solid #444;background:#1b1b1b;color:#bbb;width:28px;height:28px;border-radius:7px}
+.summary-close:hover{border-color:var(--accent);color:#fff}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.summary-item{background:#1b1b1b;border:1px solid #2d2d2d;border-radius:8px;padding:12px}
+.summary-item strong{display:block;font-size:13px}
+.summary-item span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.summary-progress{height:7px;background:#292929;border-radius:10px;overflow:hidden;margin-top:9px}
+.summary-progress i{display:block;height:100%;background:var(--accent);border-radius:10px}
+.summary-list{display:flex;flex-direction:column;gap:8px}
+.summary-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;background:#1a1a1a;border:1px solid #2b2b2b;border-radius:7px;font-size:12px}
+.summary-row small{color:#777}
+.summary-link{display:inline-block;margin-top:14px;color:var(--accent);font-size:12px;border:0;background:none;padding:0;cursor:pointer}
+@media(max-width:760px){.summary-grid{grid-template-columns:1fr}}
+
+@media(max-width:1000px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .dashboard-grid{grid-template-columns:1fr}
+  .kanban{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .sidebar{
+    transform:translateX(-100%);
+    transition:.2s;
+    box-shadow:10px 0 35px rgba(0,0,0,.4);
+  }
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;width:100%}
+  .menu-btn{display:block;position:absolute;left:15px}
+  .topbar{justify-content:flex-end;padding:0 15px}
+  .page{padding:22px 15px 35px}
+  .stats{grid-template-columns:1fr 1fr}
+  .section-head{align-items:flex-start;flex-direction:column}
+  .toolbar{width:100%}
+  .search-box.open{flex:1;width:auto}
+  .delivery-table-wrap{overflow-x:auto}
+  .kanban{grid-template-columns:1fr}
+  .row2{flex-direction:column;gap:0}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr}
+  .user-area span{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH ================= -->
+<div id="auth">
+
+  <div class="auth-card show" id="card-login">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to manage your storage and delivery operations.</p>
+    <div class="field"><label>Email</label><input type="email" id="loginEmail"></div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pwd-wrap">
+        <input type="password" id="loginPass">
+        <span class="toggle-eye" onclick="togglePwd('loginPass',this)">show</span>
+      </div>
+    </div>
+    <div style="text-align:right;margin-bottom:14px">
+      <button class="btn-link" onclick="go('forgot')">Forgot password?</button>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign in</button>
+    <div class="msg err" id="loginMsg"></div>
+    <div class="auth-foot">No account? <button class="btn-link" onclick="go('signup')">Create one</button></div>
+    <div class="hint">Demo login — <b>demo@stocksense.io</b> / <b>demo1234</b></div>
+  </div>
+
+  <div class="auth-card" id="card-signup">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Create your account</h1>
+    <p class="sub">Set up access to your team's operations dashboard.</p>
+    <div class="field"><label>Full name</label><input type="text" id="suName"></div>
+    <div class="field"><label>Email</label><input type="email" id="suEmail"></div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pwd-wrap">
+        <input type="password" id="suPass">
+        <span class="toggle-eye" onclick="togglePwd('suPass',this)">show</span>
+      </div>
+    </div>
+    <div class="field"><label>Confirm password</label><input type="password" id="suConfirm"></div>
+    <button class="btn-primary" onclick="doSignup()">Create account</button>
+    <div class="msg err" id="signupMsg"></div>
+    <div class="auth-foot">Already have an account? <button class="btn-link" onclick="go('login')">Sign in</button></div>
+  </div>
+
+  <div class="auth-card" id="card-forgot">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Reset your password</h1>
+    <p class="sub">Enter your account email and we'll send a one-time code.</p>
+    <div class="field"><label>Email</label><input type="email" id="forgotEmail"></div>
+    <button class="btn-primary" onclick="sendOtp()">Send OTP</button>
+    <div class="msg err" id="forgotMsg"></div>
+    <div class="auth-foot"><button class="btn-link" onclick="go('login')">Back to sign in</button></div>
+  </div>
+
+  <div class="auth-card" id="card-otp">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Enter verification code</h1>
+    <p class="sub" id="otpSub">We sent a 6-digit code to your email.</p>
+    <div class="otp-row">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+    </div>
+    <button class="btn-primary" onclick="verifyOtp()">Verify code</button>
+    <div class="msg err" id="otpMsg"></div>
+    <div class="auth-foot"><button class="btn-link" onclick="sendOtp(true)">Resend code</button></div>
+    <div class="hint">Demo code: <b>123456</b></div>
+  </div>
+
+  <div class="auth-card" id="card-reset">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Set a new password</h1>
+    <p class="sub">Choose a new password for your account.</p>
+    <div class="field"><label>New password</label><input type="password" id="resetPass1"></div>
+    <div class="field"><label>Confirm new password</label><input type="password" id="resetPass2"></div>
+    <button class="btn-primary" onclick="doReset()">Reset password</button>
+    <div class="msg err" id="resetMsg"></div>
+  </div>
+
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="app-shell">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        StockSense
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">▦</span>Dashboard</button>
+        <button class="nav-item" data-view="operations"><span class="nav-icon">⇢</span>Operations</button>
+        <button class="nav-item" data-view="products"><span class="nav-icon">□</span>Products</button>
+        <button class="nav-item" data-view="moves"><span class="nav-icon">↕</span>Move History</button>
+        <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span>Settings</button>
+      </nav>
+
+      <button class="logout" onclick="doLogout()"><span>⏻</span>Log out</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="user-area" id="userArea">
+          <button class="user-trigger" onclick="toggleAccountMenu(event)" aria-label="Open account menu">
+            <div class="avatar" id="topAvatar">D</div>
+            <span id="topName">Demo User</span>
+            <span class="user-chevron">▼</span>
+          </button>
+
+          <div class="account-menu" id="accountMenu">
+            <div class="account-head">
+              <div class="mini-avatar" id="menuAvatar">D</div>
+              <div>
+                <strong id="menuName">Demo User</strong>
+                <span id="menuEmail">demo@stocksense.io</span>
+              </div>
+            </div>
+
+            <button class="account-action" onclick="openMyProfile()">
+              <span class="action-icon">◉</span>
+              <span>My Profile</span>
+            </button>
+            <button class="account-action" onclick="openLoginFromMenu()">
+              <span class="action-icon">→</span>
+              <span>Login</span>
+            </button>
+            <button class="account-action" onclick="openSignupFromMenu()">
+              <span class="action-icon">+</span>
+              <span>Sign Up</span>
+            </button>
+            <div class="account-divider"></div>
+            <button class="account-action danger" onclick="doLogout()">
+              <span class="action-icon">⏻</span>
+              <span>Log out</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section class="page" id="view-dashboard">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-desc">Overview of your storage and delivery operations.</p>
+
+        <div class="stats">
+          <button class="stat-card stat-clickable" data-summary="storage" onclick="showDashboardSummary('storage')">
+            <div class="stat-label">Items in storage</div>
+            <div class="stat-value">1,284</div>
+            <div class="stat-meta">Across all warehouse zones · Click for details</div>
+          </button>
+          <button class="stat-card stat-clickable" data-summary="capacity" onclick="showDashboardSummary('capacity')">
+            <div class="stat-label">Capacity used</div>
+            <div class="stat-value">76%</div>
+            <div class="stat-meta">24% capacity remaining · Click for details</div>
+          </button>
+          <button class="stat-card stat-clickable" data-summary="deliveries" onclick="showDashboardSummary('deliveries')">
+            <div class="stat-label">Active deliveries</div>
+            <div class="stat-value" id="dashDeliveries">4</div>
+            <div class="stat-meta">Currently being processed · Click for details</div>
+          </button>
+          <button class="stat-card stat-clickable" data-summary="stock" onclick="showDashboardSummary('stock')">
+            <div class="stat-label">Low stock alerts</div>
+            <div class="stat-value">12</div>
+            <div class="stat-meta">Require attention · Click for details</div>
+          </button>
+        </div>
+
+        <div class="dashboard-summary" id="dashboardSummary" style="display:none"></div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Delivery activity</div>
+                <div class="card-sub">Orders processed this week</div>
+              </div>
+            </div>
+            <div class="chart">
+              <div class="bar-wrap"><div class="bar" style="height:43%"></div><span class="bar-label">Mon</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:62%"></div><span class="bar-label">Tue</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:49%"></div><span class="bar-label">Wed</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:79%"></div><span class="bar-label">Thu</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:68%"></div><span class="bar-label">Fri</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:35%"></div><span class="bar-label">Sat</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:25%"></div><span class="bar-label">Sun</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Recent activity</div>
+                <div class="card-sub">Latest operations</div>
+              </div>
+            </div>
+            <div class="activity-list">
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>WH/OUT/0002 ready</strong><span>Azure Interior</span></div>
+                <span class="activity-time">10m</span>
+              </div>
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>WH/OUT/0001 scheduled</strong><span>Vendor delivery</span></div>
+                <span class="activity-time">32m</span>
+              </div>
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>Product moved</strong><span>WH/Stock1 → WH/Stock2</span></div>
+                <span class="activity-time">1h</span>
+              </div>
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>Low stock alert</strong><span>Product #1048</span></div>
+                <span class="activity-time">2h</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPERATIONS / DELIVERY -->
+      <section class="page" id="view-operations" style="display:none">
+        <div class="section-head">
+          <div class="section-title">
+            <button class="new-btn" onclick="showView('dashboard')">← BACK</button>
+            <button class="new-btn" onclick="openNewDelivery()">NEW</button>
+            <h2>Delivery</h2>
+          </div>
+
+          <div class="toolbar">
+            <button class="search-box" id="searchBtn" onclick="toggleSearch()" title="Search">⌕
+              <input id="deliverySearch" type="text" placeholder="Reference or contact..." oninput="renderDeliveries()">
+            </button>
+            <button class="view-btn active" id="listBtn" onclick="setDeliveryView('list')" title="List view">☷</button>
+            <button class="view-btn" id="kanbanBtn" onclick="setDeliveryView('kanban')" title="Kanban view">▦</button>
+          </div>
+        </div>
+
+        <div class="delivery-table-wrap" id="listView">
+          <table class="delivery-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Contact</th>
+                <th>Schedule date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="deliveryBody"></tbody>
+          </table>
+        </div>
+
+        <div class="kanban" id="kanbanView"></div>
+
+        <div id="deliveryDetailView" style="display:none;"></div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section class="page" id="view-products" style="display:none">
+        <h1 class="page-title">Products</h1>
+        <p class="page-desc">Manage products and their warehouse quantities.</p>
+
+        <div id="productsListView">
+          <div class="data-card">
+            <table class="simple-table">
+              <thead>
+                <tr><th>Product</th><th>SKU</th><th>Location</th><th>Quantity</th><th>Status / Update</th></tr>
+              </thead>
+              <tbody id="productsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="productDetailView" style="display:none;"></div>
+      </section>
+
+      <!-- MOVE HISTORY -->
+      <section class="page" id="view-moves" style="display:none">
+        <h1 class="page-title">Move History</h1>
+        <p class="page-desc">Track inventory movements between warehouse locations.</p>
+
+        <div class="data-card">
+          <table class="simple-table">
+            <thead>
+              <tr><th>Reference</th><th>Product</th><th>From</th><th>To</th><th>Date</th><th>User</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="ref">WH/MOVE/0012</td><td>Office Chair</td><td>WH/Stock1</td><td>WH/Stock2</td><td>26 Sep 2026</td><td>Demo User</td></tr>
+              <tr><td class="ref">WH/MOVE/0011</td><td>Desk Lamp</td><td>WH/Stock3</td><td>WH/Stock1</td><td>26 Sep 2026</td><td>Demo User</td></tr>
+              <tr><td class="ref">WH/MOVE/0010</td><td>Keyboard</td><td>WH/Stock2</td><td>WH/Stock3</td><td>25 Sep 2026</td><td>Operations</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="page" id="view-settings" style="display:none">
+        <h1 class="page-title">Settings</h1>
+        <p class="page-desc">Manage account security and application preferences.</p>
+
+        <div class="panel">
+          <h3>Change password</h3>
+          <div class="field"><label>Current password</label><input type="password"></div>
+          <div class="row2">
+            <div class="field"><label>New password</label><input type="password"></div>
+            <div class="field"><label>Confirm new password</label><input type="password"></div>
+          </div>
+          <button class="btn-save" onclick="toast('Password update saved.')">Update password</button>
+        </div>
+
+        <div class="panel">
+          <h3>Preferences</h3>
+          <div class="toggle-list">
+            <div class="toggle-item">
+              <div><span class="t-label">Email notifications</span><span class="t-desc">Receive delivery and low-stock alerts</span></div>
+              <div class="switch on" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+            </div>
+            <div class="toggle-item">
+              <div><span class="t-label">Two-factor authentication</span><span class="t-desc">Require an OTP during sign in</span></div>
+              <div class="switch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Profile</h3>
+          <div class="profile-head">
+            <div class="big-avatar" id="profAvatar">D</div>
+            <div><h3 id="profName">Demo User</h3><p>Team member · Operations</p></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Full name</label><input id="pfName" value="Demo User"></div>
+            <div class="field"><label>Email</label><input id="pfEmail" value="demo@stocksense.io"></div>
+          </div>
+          <div class="field"><label>Phone</label><input id="pfPhone" placeholder="+91 00000 00000"></div>
+          <button class="btn-save" onclick="saveProfile()">Save changes</button>
+          <div class="msg ok" id="profMsg"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ================= NEW DELIVERY MODAL ================= -->
+<div class="modal-backdrop" id="deliveryModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Create new delivery</h3>
+      <button class="close" onclick="closeNewDelivery()">×</button>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>From</label>
+        <input id="newFrom" value="WH/Stock1">
+      </div>
+      <div class="field">
+        <label>To</label>
+        <input id="newTo" value="Vendor">
+      </div>
+    </div>
+
+    <div class="field"><label>Contact</label><input id="newContact" placeholder="Customer / vendor contact"></div>
+
+    <div class="row2">
+      <div class="field"><label>Schedule date</label><input type="date" id="newDate"></div>
+      <div class="field">
+        <label>Status</label>
+        <select id="newStatus">
+          <option value="Ready">Ready</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="In Progress">In Progress</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeNewDelivery()">Cancel</button>
+      <button class="new-btn" onclick="createDelivery()">Create delivery</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= AUTH ================= */
+let pendingEmail = '';
+
+function go(name){
+  document.querySelectorAll('.auth-card').forEach(c => c.classList.remove('show'));
+  const card = document.getElementById('card-' + name);
+  if(card) card.classList.add('show');
+}
+
+function togglePwd(id,el){
+  const input=document.getElementById(id);
+  const isPwd=input.type==='password';
+  input.type=isPwd?'text':'password';
+  el.textContent=isPwd?'hide':'show';
+}
+
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const msg=document.getElementById('loginMsg');
+
+  if(email==='demo@stocksense.io' && pass==='demo1234'){
+    msg.textContent='';
+    enterApp(email,'Demo User');
+  }else{
+    msg.textContent='Incorrect email or password.';
+  }
+}
+
+function doSignup(){
+  const name=document.getElementById('suName').value.trim();
+  const email=document.getElementById('suEmail').value.trim();
+  const p1=document.getElementById('suPass').value;
+  const p2=document.getElementById('suConfirm').value;
+  const msg=document.getElementById('signupMsg');
+
+  if(!name || !email || !p1){msg.textContent='Please fill in every field.';return}
+  if(p1.length<8){msg.textContent='Password must be at least 8 characters.';return}
+  if(p1!==p2){msg.textContent='Passwords do not match.';return}
+
+  msg.textContent='';
+  enterApp(email,name);
+}
+
+function sendOtp(resend=false){
+  const email=document.getElementById('forgotEmail').value.trim() || pendingEmail;
+  if(!resend && !email){
+    document.getElementById('forgotMsg').textContent='Enter your account email.';
+    return;
+  }
+
+  pendingEmail=email;
+  document.getElementById('otpSub').textContent='We sent a 6-digit code to '+email;
+  const msg=document.getElementById('otpMsg');
+  msg.className='msg ok';
+  msg.textContent=resend?'A new code has been sent.':'';
+  go('otp');
+
+  document.querySelectorAll('.otp-row input').forEach(i=>i.value='');
+  document.querySelector('.otp-row input').focus();
+}
+
+document.addEventListener('input',e=>{
+  if(e.target.closest('.otp-row') && e.target.value){
+    const inputs=[...document.querySelectorAll('.otp-row input')];
+    const index=inputs.indexOf(e.target);
+    if(index<inputs.length-1) inputs[index+1].focus();
+  }
+});
+
+function verifyOtp(){
+  const code=[...document.querySelectorAll('.otp-row input')].map(i=>i.value).join('');
+  const msg=document.getElementById('otpMsg');
+
+  if(code==='123456'){
+    msg.className='msg ok';
+    msg.textContent='';
+    go('reset');
+  }else{
+    msg.className='msg err';
+    msg.textContent='Incorrect code. Try again.';
+  }
+}
+
+function doReset(){
+  const p1=document.getElementById('resetPass1').value;
+  const p2=document.getElementById('resetPass2').value;
+  const msg=document.getElementById('resetMsg');
+
+  if(p1.length<8){msg.textContent='Password must be at least 8 characters.';return}
+  if(p1!==p2){msg.textContent='Passwords do not match.';return}
+
+  msg.className='msg ok';
+  msg.textContent='Password updated. Redirecting to sign in...';
+  setTimeout(()=>go('login'),1200);
+}
+
+function enterApp(email,name){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='block';
+
+  const initial=(name || email || 'U').trim()[0].toUpperCase();
+  document.getElementById('topAvatar').textContent=initial;
+  document.getElementById('topName').textContent=name || email;
+  document.getElementById('menuAvatar').textContent=initial;
+  document.getElementById('menuName').textContent=name || email;
+  document.getElementById('menuEmail').textContent=email || '';
+  document.getElementById('profAvatar').textContent=initial;
+  document.getElementById('profName').textContent=name || email;
+  document.getElementById('pfName').value=name || '';
+  document.getElementById('pfEmail').value=email || '';
+
+  showView('dashboard');
+}
+
+function toggleAccountMenu(event){
+  if(event) event.stopPropagation();
+  const area=document.getElementById('userArea');
+  const menu=document.getElementById('accountMenu');
+  area.classList.toggle('open');
+  menu.classList.toggle('show');
+}
+
+function closeAccountMenu(){
+  document.getElementById('userArea').classList.remove('open');
+  document.getElementById('accountMenu').classList.remove('show');
+}
+
+function openMyProfile(){
+  closeAccountMenu();
+  showView('settings');
+  setTimeout(()=>document.getElementById('pfName').focus(),50);
+}
+
+function openLoginFromMenu(){
+  closeAccountMenu();
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='flex';
+  go('login');
+}
+
+function openSignupFromMenu(){
+  closeAccountMenu();
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='flex';
+  go('signup');
+}
+
+function doLogout(){
+  closeAccountMenu();
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='flex';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginMsg').textContent='';
+  go('login');
+}
+
+/* ================= NAVIGATION ================= */
+function showView(name){
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.classList.toggle('active',item.dataset.view===name);
+  });
+
+  document.querySelectorAll('.page').forEach(page=>{
+    page.style.display=page.id==='view-'+name?'block':'none';
+  });
+
+  const detailView=document.getElementById('deliveryDetailView');
+  if(detailView && name!=='operations'){
+    detailView.style.display='none';
+  }
+
+  if(name==='operations'){
+    const detailView=document.getElementById('deliveryDetailView');
+    if(detailView) detailView.style.display='none';
+    const list=document.getElementById('listView');
+    const kanban=document.getElementById('kanbanView');
+    if(list) list.style.display='block';
+    if(kanban) kanban.style.display='none';
+    renderDeliveries();
+  }
+
+  if(name==='products') renderProducts();
+
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>showView(item.dataset.view));
+});
+
+document.addEventListener('click',event=>{
+  const area=document.getElementById('userArea');
+  if(area && !area.contains(event.target)) closeAccountMenu();
+});
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ================= PRODUCT / STOCK DATA ================= */
+const productsData=[
+  {name:'Office Chair',sku:'SKU-1001',location:'WH/Stock1',quantity:248,status:'In Stock',description:'Office chair inventory item.'},
+  {name:'Desk Lamp',sku:'SKU-1002',location:'WH/Stock2',quantity:184,status:'In Stock',description:'Desk lamp inventory item.'},
+  {name:'Monitor Stand',sku:'SKU-1003',location:'WH/Stock1',quantity:74,status:'Low Stock',description:'Monitor stand inventory item.'},
+  {name:'Keyboard',sku:'SKU-1004',location:'WH/Stock3',quantity:319,status:'In Stock',description:'Keyboard inventory item.'}
+];
+
+function productStorageKey(sku){return 'stocksense_product_'+sku.replace(/[^a-zA-Z0-9_-]/g,'_');}
+function loadProducts(){
+  return productsData.map(p=>{
+    try{const saved=localStorage.getItem(productStorageKey(p.sku)); if(saved)return {...p,...JSON.parse(saved)};}catch(e){}
+    return {...p};
+  });
+}
+function stockClass(status){
+  if(status==='Low Stock')return'lowstock';
+  if(status==='Out of Stock')return'outstock';
+  return'instock';
+}
+function renderProducts(){
+  const body=document.getElementById('productsBody');
+  if(!body)return;
+  body.innerHTML=loadProducts().map(p=>`
+    <tr class="product-clickable" onclick="openProductDetail('${p.sku}')">
+      <td><strong>${escapeHtml(p.name)}</strong></td>
+      <td>${escapeHtml(p.sku)}</td>
+      <td>${escapeHtml(p.location)}</td>
+      <td>${Number(p.quantity)}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="stock-cell">
+          <span class="badge ${stockClass(p.status)}">${escapeHtml(p.status)}</span>
+          <button class="stock-update" onclick="openStockMenu(event,'${p.sku}')">Update</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function openStockMenu(event,sku){
+  event.stopPropagation();
+  document.querySelectorAll('.stock-menu').forEach(m=>m.remove());
+  const btn=event.currentTarget;
+  const menu=document.createElement('div');
+  menu.className='stock-menu show';
+  menu.innerHTML=['In Stock','Low Stock','Out of Stock'].map(status=>`<button onclick="setStockStatus(event,'${sku}','${status}')">${status}</button>`).join('');
+  document.body.appendChild(menu);
+  const r=btn.getBoundingClientRect();
+  menu.style.left=(r.left+window.scrollX)+'px';
+  menu.style.top=(r.bottom+window.scrollY+5)+'px';
+}
+function setStockStatus(event,sku,status){
+  event.stopPropagation();
+  const products=loadProducts();
+  const p=products.find(x=>x.sku===sku);
+  if(!p)return;
+  p.status=status;
+  localStorage.setItem(productStorageKey(sku),JSON.stringify({status:p.status}));
+  document.querySelectorAll('.stock-menu').forEach(m=>m.remove());
+  renderProducts();
+  toast(`${p.name}: ${status}`);
+}
+function openProductDetail(sku){
+  const p=loadProducts().find(x=>x.sku===sku);
+  if(!p)return;
+
+  const listView=document.getElementById('productsListView');
+  const detailView=document.getElementById('productDetailView');
+  if(!listView || !detailView)return;
+
+  listView.style.display='none';
+  detailView.style.display='block';
+  renderSamePageProductDetail(p);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function closeProductDetail(){
+  const listView=document.getElementById('productsListView');
+  const detailView=document.getElementById('productDetailView');
+  if(detailView)detailView.style.display='none';
+  if(listView)listView.style.display='block';
+  renderProducts();
+}
+
+function renderSamePageProductDetail(p){
+  const detailView=document.getElementById('productDetailView');
+  if(!detailView)return;
+
+  detailView.innerHTML=`
+    <div class="same-page-detail product-same-detail">
+      <div class="same-detail-titlebar">
+        <button class="detail-back-btn" onclick="closeProductDetail()">← BACK</button>
+        <div class="same-detail-title">Product Details</div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="detail-action primary" onclick="saveSamePageProduct('${escapeHtml(p.sku)}')">Save Changes</button>
+        <button class="detail-action" onclick="window.print()">Print</button>
+        <button class="detail-action" onclick="cancelSamePageProduct()">Cancel</button>
+      </div>
+
+      <div class="detail-info">
+        <div class="detail-reference">[${escapeHtml(p.sku)}] ${escapeHtml(p.name)}</div>
+
+        <div class="detail-form-grid">
+          <div class="detail-field">
+            <label>Product Name</label>
+            <input id="sameProductName" value="${escapeHtml(p.name)}" placeholder="Product name">
+          </div>
+
+          <div class="detail-field">
+            <label>SKU</label>
+            <input id="sameProductSku" value="${escapeHtml(p.sku)}" disabled>
+          </div>
+
+          <div class="detail-field">
+            <label>Location</label>
+            <input id="sameProductLocation" value="${escapeHtml(p.location)}" placeholder="Warehouse location">
+          </div>
+
+          <div class="detail-field">
+            <label>Quantity</label>
+            <input id="sameProductQuantity" type="number" min="0" value="${Number(p.quantity)||0}" oninput="updateSameProductQuantity()">
+          </div>
+
+          <div class="detail-field">
+            <label>Stock Status</label>
+            <select id="sameProductStatus">
+              <option ${p.status==='In Stock'?'selected':''}>In Stock</option>
+              <option ${p.status==='Low Stock'?'selected':''}>Low Stock</option>
+              <option ${p.status==='Out of Stock'?'selected':''}>Out of Stock</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-products">
+        <div class="detail-products-title">Stock Information</div>
+        <table class="detail-product-table">
+          <thead><tr><th>Product</th><th>SKU</th><th>Location</th><th>Quantity</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>${escapeHtml(p.name)}</td>
+              <td>${escapeHtml(p.sku)}</td>
+              <td id="sameProductLocationPreview">${escapeHtml(p.location)}</td>
+              <td id="sameProductQuantityPreview">${Number(p.quantity)||0}</td>
+              <td><span id="sameProductStatusPreview" class="detail-stock-ok">${escapeHtml(p.status)}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="detail-notes">
+        <div class="detail-field">
+          <label>Description / Notes</label>
+          <textarea id="sameProductDescription" rows="3" placeholder="Add product description or notes...">${escapeHtml(p.description||'')}</textarea>
+        </div>
+      </div>
+
+      <div class="detail-footer">
+        <span id="sameProductSaveMessage">Product details loaded. Save your changes when ready.</span>
+        <div class="detail-footer-actions">
+          <button class="detail-action" onclick="closeProductDetail()">← Back to Products</button>
+          <button class="detail-action primary" onclick="saveSamePageProduct('${escapeHtml(p.sku)}')">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  ['sameProductName','sameProductLocation','sameProductQuantity','sameProductStatus','sameProductDescription'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',markSameProductUnsaved);
+    if(el)el.addEventListener('change',markSameProductUnsaved);
+  });
+}
+
+function updateSameProductQuantity(){
+  const input=document.getElementById('sameProductQuantity');
+  const preview=document.getElementById('sameProductQuantityPreview');
+  if(preview)preview.textContent=Math.max(0,Number(input ? input.value : 0));
+  markSameProductUnsaved();
+}
+
+function markSameProductUnsaved(){
+  const msg=document.getElementById('sameProductSaveMessage');
+  const location=document.getElementById('sameProductLocation');
+  const status=document.getElementById('sameProductStatus');
+  const statusPreview=document.getElementById('sameProductStatusPreview');
+  const locationPreview=document.getElementById('sameProductLocationPreview');
+
+  if(location && locationPreview)locationPreview.textContent=location.value;
+  if(status && statusPreview){
+    statusPreview.textContent=status.value;
+    statusPreview.className=status.value==='Out of Stock'?'detail-stock-bad':(status.value==='Low Stock'?'detail-stock-ok':'detail-stock-ok');
+  }
+  if(msg)msg.textContent='Unsaved changes — click Save Changes to update the Products section.';
+}
+
+function saveSamePageProduct(sku){
+  const products=loadProducts();
+  const p=products.find(x=>x.sku===sku);
+  if(!p)return;
+
+  const name=document.getElementById('sameProductName').value.trim();
+  const location=document.getElementById('sameProductLocation').value.trim();
+  const quantity=Math.max(0,Number(document.getElementById('sameProductQuantity').value||0));
+  const status=document.getElementById('sameProductStatus').value;
+  const description=document.getElementById('sameProductDescription').value.trim();
+
+  if(!name){
+    const msg=document.getElementById('sameProductSaveMessage');
+    if(msg)msg.textContent='Please enter a product name before saving.';
+    document.getElementById('sameProductName').focus();
+    return;
+  }
+  if(!location){
+    const msg=document.getElementById('sameProductSaveMessage');
+    if(msg)msg.textContent='Please enter a warehouse location before saving.';
+    document.getElementById('sameProductLocation').focus();
+    return;
+  }
+
+  const data={name,sku:p.sku,location,quantity,status,description};
+  localStorage.setItem(productStorageKey(sku),JSON.stringify(data));
+
+  const msg=document.getElementById('sameProductSaveMessage');
+  if(msg)msg.innerHTML='<span class="saved">Product changes saved successfully and synced with Products.</span>';
+
+  renderSamePageProductDetail(data);
+}
+
+function cancelSamePageProduct(){
+  const detailView=document.getElementById('productDetailView');
+  if(detailView)detailView.style.display='none';
+  const listView=document.getElementById('productsListView');
+  if(listView)listView.style.display='block';
+  renderProducts();
+}
+
+document.addEventListener('click',e=>{if(!e.target.closest('.stock-menu')&&!e.target.closest('.stock-update'))document.querySelectorAll('.stock-menu').forEach(m=>m.remove());});
+
+/* ================= DELIVERY DATA ================= */
+let deliveries=[
+  {
+    reference:'WH/OUT/0001',
+    from:'WH/Stock1',
+    to:'vendor',
+    contact:'Azure Interior',
+    date:'26 Sep 2026',
+    status:'Ready'
+  },
+  {
+    reference:'WH/OUT/0002',
+    from:'WH/Stock1',
+    to:'vendor',
+    contact:'Azure Interior',
+    date:'26 Sep 2026',
+    status:'Ready'
+  },
+  {
+    reference:'WH/OUT/0003',
+    from:'WH/Stock2',
+    to:'customer',
+    contact:'Deco Addict',
+    date:'27 Sep 2026',
+    status:'Scheduled'
+  },
+  {
+    reference:'WH/OUT/0004',
+    from:'WH/Stock1',
+    to:'customer',
+    contact:'Lumber Inc.',
+    date:'27 Sep 2026',
+    status:'In Progress'
+  },
+  {
+    reference:'WH/OUT/0005',
+    from:'WH/Stock3',
+    to:'vendor',
+    contact:'Ready Mat',
+    date:'28 Sep 2026',
+    status:'Delivered'
+  }
+];
+
+
+/* Restore detail fields saved from previous detail-tab edits. */
+deliveries=deliveries.map(d=>getSavedDeliveryDetail(d.reference,d));
+
+function statusClass(status){
+  if(status==='Ready')return'ready';
+  if(status==='Scheduled')return'scheduled';
+  if(status==='In Progress')return'progress';
+  return'delivered';
+}
+
+function renderDeliveries(){
+  const query=(document.getElementById('deliverySearch').value||'').trim().toLowerCase();
+
+  const filtered=deliveries.filter(d=>
+    d.reference.toLowerCase().includes(query) ||
+    d.contact.toLowerCase().includes(query)
+  );
+
+  const body=document.getElementById('deliveryBody');
+
+  if(!filtered.length){
+    body.innerHTML='<tr><td colspan="6" class="empty">No delivery orders found.</td></tr>';
+  }else{
+    body.innerHTML=filtered.map(d=>`
+      <tr>
+        <td class="ref"><button class="reference-link" onclick="openDeliveryDetail('${d.reference}')">${d.reference}</button></td>
+        <td>${d.from}</td>
+        <td>${d.to}</td>
+        <td>${d.contact}</td>
+        <td>${d.date}</td>
+        <td><span class="status ${statusClass(d.status)}">${d.status}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  renderKanban(filtered);
+  document.getElementById('dashDeliveries').textContent=
+    deliveries.filter(d=>d.status!=='Delivered').length;
+}
+
+function renderKanban(data=deliveries){
+  const columns=[
+    ['Ready','ready'],
+    ['Scheduled','scheduled'],
+    ['In Progress','progress'],
+    ['Delivered','delivered']
+  ];
+
+  document.getElementById('kanbanView').innerHTML=columns.map(([name,cls])=>{
+    const items=data.filter(d=>d.status===name);
+
+    return `
+      <div class="k-column">
+        <div class="k-head">
+          <strong>${name}</strong>
+          <span class="k-count">${items.length}</span>
+        </div>
+        ${items.length ? items.map(d=>`
+          <div class="k-card">
+            <div class="ref"><button class="reference-link" onclick="openDeliveryDetail('${d.reference}')">${d.reference}</button></div>
+            <p>${d.contact}</p>
+            <small>${d.from} → ${d.to}</small><br>
+            <small>${d.date}</small>
+          </div>
+        `).join('') : '<div style="font-size:11px;color:#666;padding:20px 3px">No deliveries</div>'}
+      </div>
+    `;
+  }).join('');
+}
+
+
+
+/* ================= DELIVERY DETAIL TAB ================= */
+function deliveryStorageKey(reference){
+  return 'stocksense_delivery_' + reference.replace(/[^a-zA-Z0-9_-]/g,'_');
+}
+
+function getSavedDeliveryDetail(reference, baseDelivery){
+  try{
+    const raw=localStorage.getItem(deliveryStorageKey(reference));
+    if(raw) return {...baseDelivery,...JSON.parse(raw)};
+  }catch(e){}
+
+  return {
+    ...baseDelivery,
+    address: baseDelivery.address || baseDelivery.contact || '',
+    responsible: baseDelivery.responsible || 'Demo User',
+    operationType: baseDelivery.operationType || 'Delivery',
+    products: baseDelivery.products || [{product:'Desk', sku:'DESK001', quantity:6, available:10}],
+    notes: baseDelivery.notes || ''
+  };
+}
+
+function applyDeliveryUpdate(updated){
+  const index=deliveries.findIndex(d=>d.reference===updated.reference);
+  if(index===-1) return;
+
+  deliveries[index]={
+    ...deliveries[index],
+    from:updated.from || deliveries[index].from,
+    to:updated.to || deliveries[index].to,
+    contact:updated.address || deliveries[index].contact,
+    date:updated.date || deliveries[index].date,
+    status:updated.status || deliveries[index].status,
+    responsible:updated.responsible || deliveries[index].responsible,
+    operationType:updated.operationType || deliveries[index].operationType,
+    products:updated.products || deliveries[index].products
+  };
+  renderDeliveries();
+}
+
+function openDeliveryDetail(reference){
+  const delivery=deliveries.find(d=>d.reference===reference);
+  if(!delivery) return;
+
+  const detail=getSavedDeliveryDetail(reference,delivery);
+
+  document.getElementById('listView').style.display='none';
+  document.getElementById('kanbanView').style.display='none';
+
+  const detailView=document.getElementById('deliveryDetailView');
+  detailView.style.display='block';
+
+  renderSamePageDeliveryDetail(detail);
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderSamePageDeliveryDetail(d){
+  const detailView=document.getElementById('deliveryDetailView');
+  const products=(d.products && d.products.length)
+    ? d.products
+    : [{product:'Desk',sku:'DESK001',quantity:6,available:10}];
+
+  detailView.innerHTML=`
+    <div class="same-page-detail">
+      <div class="same-detail-titlebar">
+        <button class="detail-back-btn" onclick="backToDeliveryList()">← BACK</button>
+        <button class="detail-back-btn" onclick="openNewDelivery()">NEW</button>
+        <div class="same-detail-title">Delivery</div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="detail-action primary" onclick="validateSamePageDelivery()">Validate</button>
+        <button class="detail-action" onclick="saveSamePageDraft()">Save Draft</button>
+        <button class="detail-action" onclick="window.print()">Print</button>
+        <button class="detail-action" onclick="cancelSamePageDelivery()">Cancel</button>
+        <div class="detail-stepper" id="sameDetailStepper"></div>
+      </div>
+
+      <div class="detail-info">
+        <div class="detail-reference">${escapeHtml(d.reference)}</div>
+
+        <div class="detail-form-grid">
+          <div class="detail-field">
+            <label>Delivery Address</label>
+            <input id="sameAddress" value="${escapeHtml(d.address || d.contact || '')}" placeholder="Enter delivery address">
+          </div>
+
+          <div class="detail-field">
+            <label>Schedule Date</label>
+            <input id="sameDate" type="date" value="${toInputDate(d.date)}">
+          </div>
+
+          <div class="detail-field">
+            <label>Responsible</label>
+            <input id="sameResponsible" value="${escapeHtml(d.responsible || 'Demo User')}" placeholder="Responsible person">
+          </div>
+
+          <div class="detail-field">
+            <label>Operation Type</label>
+            <select id="sameOperationType">
+              <option ${d.operationType==='Delivery'?'selected':''}>Delivery</option>
+              <option ${d.operationType==='Return'?'selected':''}>Return</option>
+              <option ${d.operationType==='Internal Transfer'?'selected':''}>Internal Transfer</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-products">
+        <div class="detail-products-title">Products</div>
+        <table class="detail-product-table">
+          <thead>
+            <tr><th>Product</th><th>Quantity</th><th>Available Stock</th><th></th></tr>
+          </thead>
+          <tbody id="sameProductBody">
+            ${products.map(p=>`
+              <tr>
+                <td>
+                  <select class="same-product" onchange="sameProductChanged(this)">
+                    <option value="Desk" data-stock="10" ${p.product==='Desk'?'selected':''}>[DESK001] Desk</option>
+                    <option value="Office Chair" data-stock="248" ${p.product==='Office Chair'?'selected':''}>[SKU-1001] Office Chair</option>
+                    <option value="Desk Lamp" data-stock="184" ${p.product==='Desk Lamp'?'selected':''}>[SKU-1002] Desk Lamp</option>
+                    <option value="Monitor Stand" data-stock="74" ${p.product==='Monitor Stand'?'selected':''}>[SKU-1003] Monitor Stand</option>
+                    <option value="Keyboard" data-stock="319" ${p.product==='Keyboard'?'selected':''}>[SKU-1004] Keyboard</option>
+                  </select>
+                </td>
+                <td><input class="same-quantity" type="number" min="1" value="${Number(p.quantity)||1}" oninput="checkSameStock(this)"></td>
+                <td><span class="same-stock-label detail-stock-ok">${Number(p.available ?? 0)}</span></td>
+                <td><button class="detail-remove" onclick="removeSameProduct(this)" title="Remove product">×</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="detail-warning" id="sameStockWarning">
+          One or more product quantities are greater than available stock.
+        </div>
+
+        <div class="detail-add-product" onclick="addSameProduct()">+ Add New Product</div>
+      </div>
+
+      <div class="detail-notes">
+        <div class="detail-field">
+          <label>Notes</label>
+          <textarea id="sameNotes" rows="3" placeholder="Add notes for this delivery...">${escapeHtml(d.notes || '')}</textarea>
+        </div>
+      </div>
+
+      <div class="detail-footer">
+        <span id="sameSaveMessage">Draft loaded. Enter details and save when ready.</span>
+        <div class="detail-footer-actions">
+          <button class="detail-action" onclick="backToDeliveryList()">← Back to Operations</button>
+          <button class="detail-action" onclick="saveSamePageDraft()">Save Draft</button>
+          <button class="detail-action primary" onclick="saveSamePageDelivery()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  currentSameDeliveryStatus=d.status || 'Draft';
+  renderSameStepper();
+  checkAllSameStock();
+
+  ['sameAddress','sameDate','sameResponsible','sameOperationType','sameNotes'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input',()=>{
+      const msg=document.getElementById('sameSaveMessage');
+      if(msg) msg.textContent='Unsaved changes — click Save Changes to sync with Operations.';
+    });
+  });
+}
+
+let currentSameDeliveryStatus='Draft';
+
+function renderSameStepper(){
+  const stepper=document.getElementById('sameDetailStepper');
+  if(!stepper) return;
+
+  const status=currentSameDeliveryStatus;
+  const active=status==='Delivered'?3:(status==='In Progress'?2:(status==='Scheduled'?1:0));
+  const names=['Draft','Waiting','Ready','Done'];
+
+  stepper.innerHTML=names.map((name,i)=>{
+    const cls=i<active?'done':(i===active?'active':'step');
+    return `<span class="step ${cls}">${name}</span>${i<3?' &gt; ':''}`;
+  }).join('');
+}
+
+function sameStockFor(product){
+  const map={
+    'Desk':10,
+    'Office Chair':248,
+    'Desk Lamp':184,
+    'Monitor Stand':74,
+    'Keyboard':319
+  };
+  return map[product] || 0;
+}
+
+function sameProductChanged(select){
+  const row=select.closest('tr');
+  const opt=select.options[select.selectedIndex];
+  const stock=Number(opt.dataset.stock || sameStockFor(select.value));
+  row.querySelector('.same-stock-label').textContent=stock;
+  checkSameStock(row.querySelector('.same-quantity'));
+}
+
+function checkSameStock(input){
+  const row=input.closest('tr');
+  if(!row) return;
+
+  const select=row.querySelector('.same-product');
+  const stock=sameStockFor(select.value);
+  const qty=Number(input.value || 0);
+  const bad=qty>stock;
+
+  row.classList.toggle('detail-stock-bad-row',bad);
+  const label=row.querySelector('.same-stock-label');
+  label.classList.toggle('detail-stock-bad',bad);
+  label.classList.toggle('detail-stock-ok',!bad);
+
+  const warning=document.getElementById('sameStockWarning');
+  if(warning){
+    warning.classList.toggle(
+      'show',
+      document.querySelectorAll('.detail-stock-bad-row').length>0
+    );
+  }
+}
+
+function checkAllSameStock(){
+  document.querySelectorAll('#sameProductBody .same-quantity')
+    .forEach(checkSameStock);
+}
+
+function addSameProduct(){
+  const tbody=document.getElementById('sameProductBody');
+  if(!tbody) return;
+
+  const row=document.createElement('tr');
+
+  row.innerHTML=`
+    <td>
+      <select class="same-product" onchange="sameProductChanged(this)">
+        <option value="Desk" data-stock="10">[DESK001] Desk</option>
+        <option value="Office Chair" data-stock="248">[SKU-1001] Office Chair</option>
+        <option value="Desk Lamp" data-stock="184">[SKU-1002] Desk Lamp</option>
+        <option value="Monitor Stand" data-stock="74">[SKU-1003] Monitor Stand</option>
+        <option value="Keyboard" data-stock="319">[SKU-1004] Keyboard</option>
+      </select>
+    </td>
+    <td><input class="same-quantity" type="number" min="1" value="1" oninput="checkSameStock(this)"></td>
+    <td><span class="same-stock-label detail-stock-ok">10</span></td>
+    <td><button class="detail-remove" onclick="removeSameProduct(this)">×</button></td>
+  `;
+
+  tbody.appendChild(row);
+}
+
+function removeSameProduct(btn){
+  const rows=document.querySelectorAll('#sameProductBody tr');
+
+  if(rows.length<=1){
+    toast('At least one product line is required.');
+    return;
+  }
+
+  btn.closest('tr').remove();
+  checkAllSameStock();
+}
+
+function collectSamePageProducts(){
+  return [...document.querySelectorAll('#sameProductBody tr')].map(row=>{
+    const select=row.querySelector('.same-product');
+    const opt=select.options[select.selectedIndex];
+
+    return {
+      product:select.value,
+      sku:opt.textContent.match(/\[(.*?)\]/)?.[1] || '',
+      quantity:Number(row.querySelector('.same-quantity').value || 0),
+      available:sameStockFor(select.value)
+    };
+  });
+}
+
+function collectSamePageDeliveryData(status){
+  const reference=document.querySelector('.detail-reference')?.textContent.trim();
+
+  const dateValue=document.getElementById('sameDate')?.value || '';
+
+  const formattedDate=dateValue
+    ? new Date(dateValue+'T00:00:00').toLocaleDateString(
+        'en-GB',
+        {day:'2-digit',month:'short',year:'numeric'}
+      )
+    : '';
+
+  return {
+    reference,
+    address:document.getElementById('sameAddress')?.value.trim() || '',
+    date:formattedDate,
+    responsible:document.getElementById('sameResponsible')?.value.trim() || '',
+    operationType:document.getElementById('sameOperationType')?.value || 'Delivery',
+    notes:document.getElementById('sameNotes')?.value.trim() || '',
+    products:collectSamePageProducts(),
+    status
+  };
+}
+
+function saveSamePageData(status,message){
+  checkAllSameStock();
+
+  if(document.querySelector('.detail-stock-bad-row')){
+    const msg=document.getElementById('sameSaveMessage');
+    if(msg) msg.textContent='Fix the stock warning before saving.';
+    return false;
+  }
+
+  const data=collectSamePageDeliveryData(status);
+
+  if(!data.reference) return false;
+
+  localStorage.setItem(
+    deliveryStorageKey(data.reference),
+    JSON.stringify(data)
+  );
+
+  currentSameDeliveryStatus=status;
+  applyDeliveryUpdate(data);
+  renderSameStepper();
+
+  const msg=document.getElementById('sameSaveMessage');
+  if(msg) msg.innerHTML=`<span class="saved">${escapeHtml(message)}</span>`;
+
+  return true;
+}
+
+function saveSamePageDraft(){
+  if(saveSamePageData('Draft','Draft saved and synced with the Operations list.')){
+    toast('Delivery draft saved.');
+  }
+}
+
+function saveSamePageDelivery(){
+  if(saveSamePageData(currentSameDeliveryStatus || 'Ready','Changes saved and synced with the Operations list.')){
+    toast('Delivery changes saved.');
+  }
+}
+
+function validateSamePageDelivery(){
+  const address=document.getElementById('sameAddress')?.value.trim();
+
+  if(!address){
+    const msg=document.getElementById('sameSaveMessage');
+    if(msg) msg.textContent='Please enter the delivery address.';
+    document.getElementById('sameAddress')?.focus();
+    return;
+  }
+
+  if(saveSamePageData('Delivered','Delivery validated and saved.')){
+    toast('Delivery validated.');
+  }
+}
+
+function cancelSamePageDelivery(){
+  const reference=document.querySelector('.detail-reference')?.textContent.trim();
+  if(reference){
+    const delivery=deliveries.find(d=>d.reference===reference);
+
+    if(delivery){
+      const data={...delivery,status:'Draft'};
+      localStorage.setItem(deliveryStorageKey(reference),JSON.stringify(data));
+      applyDeliveryUpdate(data);
+    }
+  }
+
+  backToDeliveryList();
+  toast('Delivery moved back to Draft.');
+}
+
+function backToDeliveryList(){
+  const detailView=document.getElementById('deliveryDetailView');
+  if(detailView) detailView.style.display='none';
+
+  document.getElementById('listView').style.display='block';
+  document.getElementById('kanbanView').style.display='none';
+
+  document.getElementById('listBtn').classList.add('active');
+  document.getElementById('kanbanBtn').classList.remove('active');
+
+  renderDeliveries();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function getNextDeliveryReference(){
+  let max=0;
+
+  deliveries.forEach(d=>{
+    const m=String(d.reference).match(/WH\/OUT\/(\d+)/);
+    if(m) max=Math.max(max,Number(m[1]));
+  });
+
+  return `WH/OUT/${String(max+1).padStart(4,'0')}`;
+}
+
+function openNewDelivery(){
+  const reference=getNextDeliveryReference();
+
+  const newDelivery={
+    reference,
+    from:'WH/Stock1',
+    to:'vendor',
+    contact:'New Contact',
+    date:'',
+    status:'Draft',
+    address:'',
+    responsible:'Demo User',
+    operationType:'Delivery',
+    products:[{product:'Desk',sku:'DESK001',quantity:1,available:10}],
+    notes:''
+  };
+
+  deliveries.push(newDelivery);
+
+  document.getElementById('listView').style.display='none';
+  document.getElementById('kanbanView').style.display='none';
+  document.getElementById('deliveryDetailView').style.display='block';
+
+  renderSamePageDeliveryDetail(newDelivery);
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildDeliveryDetailPage(d){
+  const safe=escapeHtml;
+  const dateInput=toInputDate(d.date);
+  const products=(d.products && d.products.length ? d.products : [{product:'Desk',sku:'DESK001',quantity:6,available:10}]);
+
+  const productRows=products.map((p,i)=>`
+    <tr data-row="${i}">
+      <td>
+        <select class="product-select" onchange="productChanged(this)">
+          <option value="Desk" data-sku="DESK001" data-stock="10" ${p.product==='Desk'?'selected':''}>[DESK001] Desk</option>
+          <option value="Office Chair" data-sku="SKU-1001" data-stock="248" ${p.product==='Office Chair'?'selected':''}>[SKU-1001] Office Chair</option>
+          <option value="Desk Lamp" data-sku="SKU-1002" data-stock="184" ${p.product==='Desk Lamp'?'selected':''}>[SKU-1002] Desk Lamp</option>
+          <option value="Monitor Stand" data-sku="SKU-1003" data-stock="74" ${p.product==='Monitor Stand'?'selected':''}>[SKU-1003] Monitor Stand</option>
+          <option value="Keyboard" data-sku="SKU-1004" data-stock="319" ${p.product==='Keyboard'?'selected':''}>[SKU-1004] Keyboard</option>
+        </select>
+      </td>
+      <td><input class="qty-input" type="number" min="1" value="${Number(p.quantity)||1}" oninput="checkStock(this)"></td>
+      <td><span class="stock-label">${Number(p.available ?? 10)}</span></td>
+      <td><button class="remove-product" onclick="removeProduct(this)" title="Remove product">×</button></td>
+    </tr>`).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${safe(d.reference)} — Delivery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#101010;--panel:#151515;--panel2:#1c1c1c;--line:#ff7777;--line-soft:#613939;--text:#f4eeee;--muted:#a89a9a;--green:#64d6a1;--yellow:#f4c66a;--danger:#ff5e6c;--blue:#78b9ff}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}body{font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}button,input,select,textarea{font:inherit}button{cursor:pointer}input,select,textarea{outline:none}
+.page-shell{width:min(1050px,calc(100% - 32px));margin:25px auto 40px}
+.top-nav{height:42px;display:flex;align-items:center;gap:25px;color:#c8baba;font-family:'Space Grotesk';font-size:12px;border-bottom:1px solid #292929}.top-nav .active{color:#fff}.top-nav .brand-mini{margin-left:auto;color:#777}
+.detail-card{border:1px solid var(--line);border-radius:0 0 15px 15px;overflow:hidden;background:#111;box-shadow:0 18px 45px rgba(0,0,0,.25)}
+.detail-titlebar{height:48px;display:flex;align-items:center;gap:16px;padding:0 13px;border-bottom:3px solid var(--line)}
+.new-pill{border:1px solid var(--line);color:var(--line);background:transparent;border-radius:6px;padding:5px 15px;font-family:'Space Grotesk';font-weight:600}.detail-title{font-family:'Space Grotesk';font-size:19px;font-weight:600}
+.actionbar{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid var(--line)}
+.action{border:1px solid var(--line);background:transparent;color:var(--line);border-radius:6px;padding:6px 13px;font-weight:600;font-size:12px}.action.primary{background:var(--line);color:#190707}.action:hover{filter:brightness(1.08)}
+.stepper{margin-left:auto;border:1px solid var(--line);border-radius:7px;padding:7px 13px;color:#eee;font-family:'Space Grotesk';font-size:11px;white-space:nowrap}.step{color:#777}.step.active{color:var(--line);font-weight:700}.step.done{color:var(--green)}
+.info-section{padding:20px 30px 18px;border-bottom:1px solid var(--line)}.reference{font-family:'Space Grotesk';font-size:18px;color:var(--accent,#ff7777);font-weight:700;margin-bottom:17px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 70px}.field{position:relative}.field label{display:block;color:#d9cccc;font-size:11px;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;background:transparent;border:0;border-bottom:2px solid var(--line);border-radius:0;color:#eee;padding:5px 0 7px;font-size:12px}.field select{appearance:auto}.field textarea{min-height:42px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:#fff}.field input::placeholder{color:#665b5b}
+.products-section{border-bottom:1px solid var(--line)}.section-label{padding:8px 5px;color:var(--line);font-family:'Space Grotesk';font-size:12px;border-bottom:1px solid var(--line)}.products-table{width:100%;border-collapse:collapse}.products-table th,.products-table td{text-align:left;padding:8px 16px;border-bottom:1px solid var(--line-soft);font-size:11.5px}.products-table th{color:#e5d8d8;font-weight:500}.products-table select,.products-table input{background:transparent;color:#eee;border:0;outline:0;width:100%;padding:3px}.products-table select{border-bottom:1px solid #744444}.products-table option{background:#1a1a1a;color:#eee}.products-table .qty-input{border-bottom:1px solid #744444;max-width:110px}.stock-ok{color:var(--green)}.stock-bad{color:var(--danger);font-weight:700}.remove-product{background:none;border:0;color:#777;font-size:18px}.remove-product:hover{color:var(--danger)}
+.add-product{padding:9px 16px;color:var(--line);font-size:11px;cursor:pointer;border-bottom:1px solid var(--line-soft)}.add-product:hover{background:#181818}.product-warning{display:none;margin:9px 16px;padding:9px 11px;border:1px solid var(--danger);border-radius:6px;color:#ff9a9f;background:rgba(255,94,108,.06);font-size:11px}.product-warning.show{display:block}
+.notes{padding:16px 30px;border-bottom:1px solid var(--line)}
+.footer{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;color:#777;font-size:10px}.saved{color:var(--green)}
+@media(max-width:700px){.page-shell{width:calc(100% - 18px);margin-top:10px}.form-grid{grid-template-columns:1fr;gap:15px}.stepper{margin-left:0;overflow:auto}.actionbar{flex-wrap:wrap}.products-table{min-width:650px}.products-section{overflow:auto}.info-section,.notes{padding-left:16px;padding-right:16px}.top-nav{gap:13px;overflow:auto}}
+</style>
+</head>
+<body>
+<div class="page-shell">
+  <div class="top-nav">
+    <span class="active">Dashboard</span><span>Operations</span><span>Products</span><span>Move History</span><span>Settings</span>
+    <span class="brand-mini">StockSense</span>
+  </div>
+
+  <div class="detail-card">
+    <div class="detail-titlebar"><button class="new-pill" onclick="backToOperations()">← Back</button><button class="new-pill" onclick="newDelivery()">New</button><div class="detail-title">Delivery</div></div>
+
+    <div class="actionbar">
+      <button class="action primary" onclick="validateDelivery()">Validate</button>
+      <button class="action" onclick="saveDraft()">Save Draft</button>
+      <button class="action" onclick="window.print()">Print</button>
+      <button class="action" onclick="cancelDelivery()">Cancel</button>
+      <div class="stepper" id="stepper"></div>
+    </div>
+
+    <div class="info-section">
+      <div class="reference">${safe(d.reference)}</div>
+      <div class="form-grid">
+        <div class="field"><label>Delivery Address</label><input id="address" value="${safe(d.address || '')}" placeholder="Enter delivery address"></div>
+        <div class="field"><label>Schedule Date</label><input id="date" type="date" value="${safe(dateInput)}"></div>
+        <div class="field"><label>Responsible</label><input id="responsible" value="${safe(d.responsible || '')}" placeholder="Responsible person"></div>
+        <div class="field"><label>Operation Type</label><select id="operationType"><option ${d.operationType==='Delivery'?'selected':''}>Delivery</option><option ${d.operationType==='Return'?'selected':''}>Return</option><option ${d.operationType==='Internal Transfer'?'selected':''}>Internal Transfer</option></select></div>
+      </div>
+    </div>
+
+    <div class="products-section">
+      <div class="section-label">Products</div>
+      <table class="products-table"><thead><tr><th>Product</th><th>Quantity</th><th>Available Stock</th><th></th></tr></thead><tbody id="productBody">${productRows}</tbody></table>
+      <div class="product-warning" id="productWarning">One or more product quantities are greater than available stock. The affected line will be highlighted before validation.</div>
+      <div class="add-product" onclick="addProduct()">+ Add New Product</div>
+    </div>
+
+    <div class="notes"><div class="field"><label>Notes</label><textarea id="notes" placeholder="Add notes for this delivery...">${safe(d.notes || '')}</textarea></div></div>
+    <div class="footer"><span id="saveState">Draft loaded. Enter the delivery details and save when ready.</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="action" onclick="backToOperations()">← Back to Operations</button><button class="action" onclick="saveDraft()">Save Draft</button><button class="action primary" onclick="saveDelivery()">Save Changes</button></div></div>
+  </div>
+</div>
+
+<script>
+const DELIVERY_KEY=${JSON.stringify(deliveryStorageKey(d.reference))};
+const REFERENCE=${JSON.stringify(d.reference)};
+let currentStatus=${JSON.stringify(d.status || 'Draft')};
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toDateLabel(value){if(!value)return ''; const dt=new Date(value+'T00:00:00'); return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function getStatusStep(){if(currentStatus==='Delivered')return 3;if(currentStatus==='In Progress')return 2;if(currentStatus==='Scheduled')return 1;return 0;}
+function renderStepper(){
+ const active=getStatusStep();
+ const names=['Draft','Waiting','Ready','Done'];
+ document.getElementById('stepper').innerHTML=names.map((n,i)=>\`<span class="step \${i<active?'done':''} \${i===active?'active':''}">\${n}</span>\${i<3?' &gt; ':''}\`).join('');
+}
+function productChanged(select){
+ const opt=select.options[select.selectedIndex];
+ const row=select.closest('tr');
+ row.querySelector('.stock-label').textContent=opt.dataset.stock;
+ checkStock(row.querySelector('.qty-input'));
+}
+function checkStock(input){
+ const row=input.closest('tr');
+ const select=row.querySelector('.product-select');
+ const stock=Number(select.options[select.selectedIndex].dataset.stock||0);
+ const qty=Number(input.value||0);
+ const label=row.querySelector('.stock-label');
+ const bad=qty>stock;
+ row.classList.toggle('stock-bad-row',bad);
+ label.classList.toggle('stock-bad',bad); label.classList.toggle('stock-ok',!bad);
+ document.getElementById('productWarning').classList.toggle('show',document.querySelectorAll('.stock-bad-row').length>0);
+}
+function addProduct(){
+ const tbody=document.getElementById('productBody');
+ const row=document.createElement('tr');
+ row.innerHTML=\`<td><select class="product-select" onchange="productChanged(this)"><option value="Desk" data-sku="DESK001" data-stock="10">[DESK001] Desk</option><option value="Office Chair" data-sku="SKU-1001" data-stock="248">[SKU-1001] Office Chair</option><option value="Desk Lamp" data-sku="SKU-1002" data-stock="184">[SKU-1002] Desk Lamp</option><option value="Monitor Stand" data-sku="SKU-1003" data-stock="74">[SKU-1003] Monitor Stand</option><option value="Keyboard" data-sku="SKU-1004" data-stock="319">[SKU-1004] Keyboard</option></select></td><td><input class="qty-input" type="number" min="1" value="1" oninput="checkStock(this)"></td><td><span class="stock-label stock-ok">10</span></td><td><button class="remove-product" onclick="removeProduct(this)">×</button></td>\`;
+ tbody.appendChild(row); productChanged(row.querySelector('.product-select')); row.querySelector('.qty-input').focus();
+}
+function removeProduct(btn){
+ const rows=document.querySelectorAll('#productBody tr');
+ if(rows.length<=1){document.getElementById('saveState').textContent='At least one product line is required.';return;}
+ btn.closest('tr').remove(); checkAllStock();
+}
+function checkAllStock(){document.querySelectorAll('.qty-input').forEach(checkStock);}
+function collectProducts(){
+ return [...document.querySelectorAll('#productBody tr')].map(row=>{
+   const select=row.querySelector('.product-select'); const opt=select.options[select.selectedIndex];
+   return {product:select.value,sku:opt.dataset.sku,quantity:Number(row.querySelector('.qty-input').value||0),available:Number(opt.dataset.stock||0)};
+ });
+}
+function collectData(status=currentStatus){
+ const products=collectProducts();
+ return {reference:REFERENCE,address:document.getElementById('address').value.trim(),date:toDateLabel(document.getElementById('date').value),responsible:document.getElementById('responsible').value.trim(),operationType:document.getElementById('operationType').value,notes:document.getElementById('notes').value.trim(),products,status};
+}
+function saveData(status=currentStatus,message='Changes saved.'){
+ currentStatus=status;
+ const data=collectData(status);
+ localStorage.setItem(DELIVERY_KEY,JSON.stringify(data));
+ try{if(window.opener && !window.opener.closed && window.opener.applyDeliveryUpdate) window.opener.applyDeliveryUpdate(data);}catch(e){}
+ renderStepper();
+ document.getElementById('saveState').innerHTML='<span class="saved">'+esc(message)+'</span>';
+}
+function validateDelivery(){
+ checkAllStock();
+ if(document.querySelector('.stock-bad-row')){document.getElementById('saveState').textContent='Cannot validate while a product is out of stock.';return;}
+ if(!document.getElementById('address').value.trim()){document.getElementById('saveState').textContent='Please enter a delivery address.';document.getElementById('address').focus();return;}
+ saveData('Delivered','Delivery validated and saved.');
+}
+function cancelDelivery(){
+ saveData('Draft','Delivery moved back to Draft and synced.');
+}
+function saveDraft(){
+ checkAllStock();
+ if(document.querySelector('.stock-bad-row')){document.getElementById('saveState').textContent='Fix the stock warning before saving this draft.';return;}
+ saveData('Draft','Draft saved and synced with the Operations tab.');
+}
+function saveDelivery(){
+ checkAllStock();
+ if(document.querySelector('.stock-bad-row')){document.getElementById('saveState').textContent='Fix the stock warning before saving this delivery.';return;}
+ saveData(currentStatus,'Changes saved and synced with the Operations tab.');
+}
+function backToOperations(){
+ try{if(window.opener&&!window.opener.closed){window.opener.focus();window.close();return;}}catch(e){}
+ history.back();
+}
+function newDelivery(){
+ document.getElementById('address').value='';document.getElementById('responsible').value='';document.getElementById('notes').value='';currentStatus='Draft';renderStepper();
+ document.getElementById('saveState').textContent='New delivery form ready. Enter details and save.';
+}
+checkAllStock();renderStepper();
+['address','date','responsible','operationType','notes'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{document.getElementById('saveState').textContent='Unsaved changes — click Save Changes to sync with Operations.';}));
+<\/script>
+</body>
+</html>`;
+}
+
+function toInputDate(dateText){
+  if(!dateText) return '';
+  const m=String(dateText).match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
+  if(!m) return '';
+  const months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  return `${m[3]}-${months[m[2]]||'01'}-${String(m[1]).padStart(2,'0')}`;
+}
+
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function showDashboardSummary(type){
+  const box=document.getElementById('dashboardSummary');
+  const configs={
+    storage:{
+      title:'Storage Overview', subtitle:'Current inventory distribution',
+      html:`<div class="summary-grid">
+        <div class="summary-item"><strong>1,284</strong><span>Total items</span></div>
+        <div class="summary-item"><strong>620</strong><span>WH/Stock1</span></div>
+        <div class="summary-item"><strong>410</strong><span>WH/Stock2</span></div>
+        <div class="summary-item"><strong>254</strong><span>WH/Stock3</span></div>
+      </div><button class="summary-link" onclick="showView('products')">View products →</button>`
+    },
+    capacity:{
+      title:'Capacity Overview', subtitle:'Warehouse utilization',
+      html:`<div class="summary-grid">
+        <div class="summary-item"><strong>76%</strong><span>Used capacity<div class="summary-progress"><i style="width:76%"></i></div></span></div>
+        <div class="summary-item"><strong>24%</strong><span>Remaining capacity<div class="summary-progress"><i style="width:24%"></i></div></span></div>
+        <div class="summary-item"><strong>3</strong><span>Active warehouse zones</span></div>
+      </div>`
+    },
+    deliveries:{
+      title:'Active Deliveries', subtitle:'Orders currently requiring attention',
+      html:`<div class="summary-list">
+        <div class="summary-row"><span><button class="reference-link" onclick="openDeliveryDetail('WH/OUT/0001')"><strong>WH/OUT/0001</strong></button><br><small>Azure Interior · Ready</small></span><span>26 Sep</span></div>
+        <div class="summary-row"><span><button class="reference-link" onclick="openDeliveryDetail('WH/OUT/0002')"><strong>WH/OUT/0002</strong></button><br><small>Azure Interior · Ready</small></span><span>26 Sep</span></div>
+        <div class="summary-row"><span><button class="reference-link" onclick="openDeliveryDetail('WH/OUT/0003')"><strong>WH/OUT/0003</strong></button><br><small>Deco Addict · Scheduled</small></span><span>27 Sep</span></div>
+        <div class="summary-row"><span><button class="reference-link" onclick="openDeliveryDetail('WH/OUT/0004')"><strong>WH/OUT/0004</strong></button><br><small>Lumber Inc. · In Progress</small></span><span>27 Sep</span></div>
+      </div><button class="summary-link" onclick="showView('operations')">View all deliveries →</button>`
+    },
+    stock:{
+      title:'Low Stock Alerts', subtitle:'Products that may need replenishment',
+      html:`<div class="summary-list">
+        <div class="summary-row"><span><strong>Monitor Stand</strong><br><small>SKU-1003 · WH/Stock1</small></span><span>74 left</span></div>
+        <div class="summary-row"><span><strong>Office Supplies</strong><br><small>SKU-1048 · WH/Stock2</small></span><span>18 left</span></div>
+        <div class="summary-row"><span><strong>Packaging Box</strong><br><small>SKU-1061 · WH/Stock3</small></span><span>26 left</span></div>
+      </div><button class="summary-link" onclick="showView('products')">View products →</button>`
+    }
+  };
+
+  const c=configs[type];
+  if(!c)return;
+  const same=box.dataset.type===type && box.style.display!=='none';
+  if(same){closeDashboardSummary();return}
+  document.querySelectorAll('.stat-clickable').forEach(card=>card.classList.toggle('selected',card.dataset.summary===type));
+  box.dataset.type=type;
+  box.innerHTML=`<div class="summary-head"><div><h3>${c.title}</h3><span>${c.subtitle}</span></div><button class="summary-close" onclick="closeDashboardSummary()">×</button></div>${c.html}`;
+  box.style.display='block';
+}
+
+function closeDashboardSummary(){
+  const box=document.getElementById('dashboardSummary');
+  box.style.display='none';
+  box.innerHTML='';
+  box.dataset.type='';
+  document.querySelectorAll('.stat-clickable').forEach(card=>card.classList.remove('selected'));
+}
+
+function toggleSearch(){
+  const box=document.getElementById('searchBtn');
+  box.classList.toggle('open');
+
+  if(box.classList.contains('open')){
+    document.getElementById('deliverySearch').focus();
+  }else{
+    document.getElementById('deliverySearch').value='';
+    renderDeliveries();
+  }
+}
+
+function setDeliveryView(type){
+  const list=document.getElementById('listView');
+  const kanban=document.getElementById('kanbanView');
+  const listBtn=document.getElementById('listBtn');
+  const kanbanBtn=document.getElementById('kanbanBtn');
+
+  if(type==='list'){
+    list.style.display='block';
+    kanban.classList.remove('show');
+    listBtn.classList.add('active');
+    kanbanBtn.classList.remove('active');
+  }else{
+    list.style.display='none';
+    kanban.classList.add('show');
+    listBtn.classList.remove('active');
+    kanbanBtn.classList.add('active');
+  }
+}
+
+/* ================= LEGACY NEW DELIVERY MODAL HELPERS ================= */
+function closeNewDelivery(){
+  document.getElementById('deliveryModal').classList.remove('show');
+}
+
+function createDelivery(){
+  const from=document.getElementById('newFrom').value.trim() || 'WH/Stock1';
+  const to=document.getElementById('newTo').value.trim() || 'vendor';
+  const contact=document.getElementById('newContact').value.trim() || 'New Contact';
+  const dateValue=document.getElementById('newDate').value;
+  const status=document.getElementById('newStatus').value;
+
+  if(!dateValue){
+    toast('Please select a schedule date.');
+    return;
+  }
+
+  const date=new Date(dateValue+'T00:00:00');
+  const formatted=date.toLocaleDateString('en-GB',{
+    day:'2-digit',month:'short',year:'numeric'
+  });
+
+  const number=String(deliveries.length+1).padStart(4,'0');
+
+  deliveries.unshift({
+    reference:'WH/OUT/'+number,
+    from,to,contact,
+    date:formatted,
+    status
+  });
+
+  closeNewDelivery();
+  renderDeliveries();
+  toast('Delivery created successfully.');
+}
+
+/* ================= PROFILE / TOAST ================= */
+function saveProfile(){
+  const name=document.getElementById('pfName').value.trim() || 'Demo User';
+  const email=document.getElementById('pfEmail').value.trim() || 'demo@stocksense.io';
+
+  document.getElementById('topName').textContent=name;
+  document.getElementById('profName').textContent=name;
+  document.getElementById('menuName').textContent=name;
+  document.getElementById('menuEmail').textContent=email;
+
+  const initial=name[0].toUpperCase();
+  document.getElementById('topAvatar').textContent=initial;
+  document.getElementById('menuAvatar').textContent=initial;
+  document.getElementById('profAvatar').textContent=initial;
+
+  const msg=document.getElementById('profMsg');
+  msg.textContent='Profile saved.';
+  setTimeout(()=>msg.textContent='',2000);
+}
+
+function toast(message){
+  const t=document.getElementById('toast');
+  t.textContent=message;
+  t.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+document.getElementById('deliveryModal').addEventListener('click',e=>{
+  if(e.target.id==='deliveryModal') closeNewDelivery();
+});
+
+/* Keep the main tab synchronized with detail tabs saved through localStorage. */
+window.addEventListener('storage', event=>{
+  if(!event.key) return;
+  if(event.key.startsWith('stocksense_delivery_')){
+    try{
+      const saved=JSON.parse(event.newValue||'null');
+      if(saved && saved.reference) applyDeliveryUpdate(saved);
+    }catch(e){}
+  }
+  if(event.key.startsWith('stocksense_product_')) renderProducts();
+});
+
+/* initial render */
+renderDeliveries();
+renderProducts();
+</script>
+
+</body>
+</html>
