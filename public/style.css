@@ -1,0 +1,799 @@
+/* =========================================
+   STOCKSENSE - MAIN ERP STYLE
+   ========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f7f7f7;
+  color: #222;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+/* =========================================
+   APPLICATION
+   ========================================= */
+
+.app {
+  min-height: 100vh;
+}
+
+
+/* =========================================
+   TOP NAVIGATION
+   ========================================= */
+
+.topbar {
+  height: 58px;
+  background: #ffffff;
+  border-bottom: 1px solid #d9d9d9;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 24px;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  font-size: 21px;
+  font-weight: 600;
+  margin-right: 42px;
+  color: #222;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.main-nav > button,
+.nav-group > button {
+  height: 100%;
+
+  border: none;
+  background: transparent;
+
+  padding: 0 15px;
+
+  font-size: 14px;
+  color: #444;
+}
+
+.main-nav > button:hover,
+.nav-group > button:hover {
+  background: #f3f3f3;
+}
+
+.main-nav > button.active {
+  color: #111;
+  font-weight: 600;
+  border-bottom: 2px solid #333;
+}
+
+
+/* =========================================
+   OPERATIONS DROPDOWN
+   ========================================= */
+
+.nav-group {
+  position: relative;
+  height: 100%;
+}
+
+.dropdown {
+  position: absolute;
+
+  top: 53px;
+  left: 0;
+
+  min-width: 150px;
+
+  background: #ffffff;
+
+  border: 1px solid #d6d6d6;
+  border-radius: 4px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+
+  padding: 5px;
+
+  z-index: 500;
+}
+
+.dropdown button {
+  display: block;
+
+  width: 100%;
+
+  border: none;
+  background: #ffffff;
+
+  text-align: left;
+
+  padding: 9px 11px;
+
+  font-size: 14px;
+  color: #333;
+
+  border-radius: 3px;
+}
+
+.dropdown button:hover {
+  background: #f2f2f2;
+}
+
+
+/* =========================================
+   PROFILE
+   ========================================= */
+
+.avatar {
+  margin-left: auto;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  border: 1px solid #cfcfcf;
+  background: #f3f3f3;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   MAIN PAGE
+   ========================================= */
+
+.page {
+  max-width: 1180px;
+
+  margin: 0 auto;
+
+  padding: 35px 32px 60px;
+}
+
+
+/* =========================================
+   PAGE TITLE
+   ========================================= */
+
+.title-row {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  margin-bottom: 22px;
+}
+
+.small-label {
+  color: #777;
+  font-size: 12px;
+
+  margin-bottom: 5px;
+}
+
+h1 {
+  margin: 0;
+
+  font-size: 27px;
+  font-weight: 600;
+}
+
+h2 {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   SEARCH
+   ========================================= */
+
+.stock-toolbar {
+  display: flex;
+  align-items: center;
+}
+
+.search-button {
+  border: 1px solid #c9c9c9;
+
+  background: #ffffff;
+
+  color: #333;
+
+  padding: 8px 14px;
+
+  border-radius: 4px;
+
+  font-size: 14px;
+}
+
+.search-button:hover {
+  background: #f3f3f3;
+}
+
+.search-box {
+  margin-bottom: 18px;
+}
+
+.search-box input {
+  width: 100%;
+  max-width: 430px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #cfcfcf;
+
+  border-radius: 4px;
+
+  background: #fff;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+.search-box input:focus {
+  border-color: #777;
+}
+
+
+/* =========================================
+   STOCK TABLE
+   ========================================= */
+
+.table-wrap {
+  width: 100%;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+
+  border-radius: 4px;
+
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f5f5f5;
+}
+
+th {
+  text-align: left;
+
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #d9d9d9;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  color: #555;
+
+  white-space: nowrap;
+}
+
+td {
+  padding: 13px 14px;
+
+  border-bottom: 1px solid #ededed;
+
+  font-size: 14px;
+
+  vertical-align: middle;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #fafafa;
+}
+
+
+/* =========================================
+   PRODUCT INFORMATION
+   ========================================= */
+
+.product-name {
+  font-weight: 500;
+
+  color: #222;
+}
+
+.product-sku {
+  margin-top: 4px;
+
+  color: #777;
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   UPDATE BUTTON
+   ========================================= */
+
+.update-button {
+  border: 1px solid #c7c7c7;
+
+  background: #ffffff;
+
+  color: #333;
+
+  padding: 6px 12px;
+
+  border-radius: 4px;
+
+  font-size: 13px;
+}
+
+.update-button:hover {
+  background: #f1f1f1;
+}
+
+
+/* =========================================
+   STOCK STATUS
+   ========================================= */
+
+.stock-status {
+  display: inline-block;
+
+  padding: 5px 10px;
+
+  border-radius: 12px;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.status-in-stock {
+  background: #e8f5e9;
+  color: #28733a;
+}
+
+.status-low-stock {
+  background: #fff3d4;
+  color: #856000;
+}
+
+.status-out-stock {
+  background: #fde8e8;
+  color: #a52a2a;
+}
+
+
+/* =========================================
+   EMPTY STATE
+   ========================================= */
+
+.empty {
+  padding: 30px;
+
+  text-align: center;
+
+  color: #777;
+
+  font-size: 14px;
+}
+
+
+/* =========================================
+   NOTE
+   ========================================= */
+
+.note {
+  margin-top: 12px;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   DELIVERY PREVIEW
+   ========================================= */
+
+.delivery-preview {
+  margin-top: 35px;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+
+  border-radius: 4px;
+
+  padding: 25px;
+}
+
+.section-top {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 22px;
+}
+
+.outline-button {
+  border: 1px solid #bbb;
+
+  background: #fff;
+
+  padding: 7px 15px;
+
+  border-radius: 4px;
+}
+
+.delivery-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid #e2e2e2;
+}
+
+.delivery-actions button {
+  border: 1px solid #c9c9c9;
+
+  background: #fff;
+
+  padding: 7px 13px;
+
+  border-radius: 4px;
+}
+
+.delivery-actions button:hover {
+  background: #f4f4f4;
+}
+
+.status-flow {
+  margin-left: auto;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+.delivery-details {
+  padding: 20px 0;
+}
+
+.reference {
+  font-size: 18px;
+
+  font-weight: 600;
+
+  margin-bottom: 18px;
+}
+
+.detail-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 18px 25px;
+}
+
+.detail-grid label {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  font-size: 13px;
+
+  color: #555;
+}
+
+.detail-grid input,
+.detail-grid select {
+  padding: 9px 10px;
+
+  border: 1px solid #ccc;
+
+  border-radius: 4px;
+
+  background: #fff;
+}
+
+.products-heading {
+  font-size: 16px;
+
+  font-weight: 600;
+
+  margin: 15px 0 10px;
+}
+
+.delivery-table {
+  border: 1px solid #ddd;
+}
+
+.new-product-link {
+  margin-top: 12px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #555;
+
+  padding: 5px 0;
+
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   STOCK UPDATE MODAL
+   ========================================= */
+
+.modal {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1000;
+}
+
+.modal-card {
+  width: 430px;
+
+  max-width: calc(100vw - 30px);
+
+  background: #ffffff;
+
+  border-radius: 5px;
+
+  border: 1px solid #d5d5d5;
+
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+
+  padding: 24px;
+}
+
+.modal-top {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  margin-bottom: 24px;
+}
+
+.close {
+  width: 30px;
+  height: 30px;
+
+  border: 1px solid #d0d0d0;
+
+  background: #fff;
+
+  border-radius: 4px;
+
+  font-size: 18px;
+
+  line-height: 1;
+}
+
+.close:hover {
+  background: #f3f3f3;
+}
+
+#stockForm {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 17px;
+}
+
+#stockForm label {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+  font-size: 13px;
+
+  color: #555;
+}
+
+#stockForm input {
+  padding: 10px;
+
+  border: 1px solid #cfcfcf;
+
+  border-radius: 4px;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+#stockForm input:focus {
+  border-color: #777;
+}
+
+.form-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  margin-top: 5px;
+}
+
+.form-actions button {
+  padding: 8px 14px;
+
+  border-radius: 4px;
+
+  border: 1px solid #c9c9c9;
+
+  background: #fff;
+}
+
+.form-actions button[type="submit"] {
+  background: #333;
+
+  color: #fff;
+
+  border-color: #333;
+}
+
+.form-actions button[type="submit"]:hover {
+  background: #222;
+}
+
+.error {
+  color: #b3261e;
+
+  font-size: 13px;
+
+  margin: 0;
+}
+
+
+/* =========================================
+   SUCCESS NOTIFICATION
+   ========================================= */
+
+.stock-notification {
+  position: fixed;
+
+  right: 24px;
+
+  bottom: 24px;
+
+  background: #222;
+
+  color: #fff;
+
+  padding: 11px 17px;
+
+  border-radius: 5px;
+
+  font-size: 14px;
+
+  opacity: 0;
+
+  transform: translateY(10px);
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+
+  z-index: 2000;
+}
+
+.stock-notification.show {
+  opacity: 1;
+
+  transform: translateY(0);
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 800px) {
+
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .brand {
+    margin-right: 12px;
+  }
+
+  .main-nav > button,
+  .nav-group > button {
+    padding: 0 8px;
+  }
+
+  .page {
+    padding: 25px 15px 40px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 750px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-flow {
+    display: none;
+  }
+}
