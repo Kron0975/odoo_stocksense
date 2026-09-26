@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockSense — Delivery Operations</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#101010;
+  --panel:#111111;
+  --panel2:#171717;
+  --panel3:#1d1d1d;
+  --line:#ff7777;
+  --line-soft:#5c3535;
+  --text:#f4eeee;
+  --muted:#a89a9a;
+  --accent:#ff7777;
+  --accent2:#ff8d8d;
+  --green:#64d6a1;
+  --yellow:#f4c66a;
+  --blue:#78b9ff;
+  --danger:#ff5e6c;
+  --shadow:0 12px 35px rgba(0,0,0,.28);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{
+  font-family:Inter,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#0e0e0e}
+::-webkit-scrollbar-thumb{background:#393939;border-radius:10px}
+
+/* ================= AUTH ================= */
+#auth{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(255,119,119,.08),transparent 32%),
+    radial-gradient(circle at 90% 90%,rgba(255,119,119,.05),transparent 32%),
+    #101010;
+}
+.auth-card{
+  width:100%;
+  max-width:410px;
+  background:#151515;
+  border:1px solid #333;
+  border-radius:16px;
+  padding:34px 30px;
+  display:none;
+  box-shadow:var(--shadow);
+}
+.auth-card.show{display:block}
+.auth-brand{display:flex;align-items:center;gap:10px;margin-bottom:25px}
+.auth-brand .mark{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  color:#160707;font-weight:800;
+}
+.auth-brand span{font-family:"Space Grotesk";font-size:18px;font-weight:700}
+.auth-card h1{font-family:"Space Grotesk";font-size:22px;margin:0 0 7px}
+.auth-card .sub{color:var(--muted);font-size:13px;margin:0 0 23px;line-height:1.5}
+.field{margin-bottom:15px}
+.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+.field input,.field select{
+  width:100%;
+  background:#1d1d1d;
+  color:var(--text);
+  border:1px solid #363636;
+  border-radius:8px;
+  padding:11px 12px;
+  outline:none;
+}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.pwd-wrap{position:relative}
+.pwd-wrap .toggle-eye{
+  position:absolute;right:11px;top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);font-size:12px;cursor:pointer;
+}
+.btn-primary{
+  width:100%;padding:12px;border:0;border-radius:8px;
+  background:var(--accent);color:#170707;font-weight:700;
+}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-link{border:0;background:none;color:var(--accent);padding:0;font-size:13px}
+.auth-foot{text-align:center;color:var(--muted);font-size:13px;margin-top:18px}
+.hint{margin-top:17px;padding-top:13px;border-top:1px solid #303030;color:var(--muted);font-size:11.5px}
+.hint b{color:var(--text)}
+.msg{min-height:18px;margin-top:8px;font-size:12.5px}
+.msg.err{color:var(--danger)}
+.msg.ok{color:var(--green)}
+.otp-row{display:flex;gap:8px;margin-bottom:14px}
+.otp-row input{text-align:center;font-size:19px;padding:11px 0}
+
+/* ================= APP ================= */
+#app{display:none;min-height:100vh}
+.app-shell{min-height:100vh;display:flex}
+
+/* sidebar */
+.sidebar{
+  width:235px;
+  position:fixed;
+  left:0;top:0;bottom:0;
+  background:#0f0f0f;
+  border-right:1px solid #272727;
+  padding:18px 13px;
+  display:flex;
+  flex-direction:column;
+  z-index:30;
+}
+.brand{
+  display:flex;align-items:center;gap:10px;
+  padding:2px 9px 26px;
+  font-family:"Space Grotesk";
+  font-size:17px;font-weight:700;
+}
+.brand-mark{
+  width:27px;height:27px;border-radius:7px;
+  background:var(--accent);
+  position:relative;
+}
+.brand-mark:before,.brand-mark:after{
+  content:"";position:absolute;background:#1a0909;border-radius:2px;
+}
+.brand-mark:before{width:5px;height:18px;left:7px;top:4px;transform:rotate(25deg)}
+.brand-mark:after{width:5px;height:12px;right:6px;bottom:4px;transform:rotate(25deg)}
+
+.nav{display:flex;flex-direction:column;gap:3px;flex:1}
+.nav-item{
+  border:0;background:transparent;
+  color:#918585;
+  display:flex;align-items:center;gap:11px;
+  padding:11px 12px;border-radius:8px;
+  text-align:left;font-size:13.5px;
+}
+.nav-item:hover{color:#fff;background:#171717}
+.nav-item.active{color:#fff;background:#1b1b1b}
+.nav-icon{width:18px;text-align:center;font-size:15px}
+.logout{
+  border:1px solid #353535;background:#141414;color:#9f9292;
+  padding:10px 12px;border-radius:8px;text-align:left;
+  display:flex;align-items:center;gap:11px;
+}
+.logout:hover{color:#fff;border-color:#666}
+
+/* main */
+.main{
+  margin-left:235px;
+  min-height:100vh;
+  width:calc(100% - 235px);
+}
+.topbar{
+  height:62px;
+  border-bottom:1px solid #292929;
+  display:flex;align-items:center;justify-content:flex-end;
+  padding:0 26px;
+  gap:15px;
+  background:#111;
+  position:sticky;top:0;z-index:20;
+}
+.user-area{display:flex;align-items:center;gap:10px;font-size:13px}
+.avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--accent);color:#1b0909;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:12px;
+}
+.menu-btn{
+  display:none;border:0;background:#191919;color:#ddd;
+  width:38px;height:38px;border-radius:8px;
+}
+.page{
+  padding:27px 31px 45px;
+  max-width:1450px;
+  margin:auto;
+}
+.page-title{
+  font-family:"Space Grotesk";
+  font-size:24px;margin:0 0 5px;
+}
+.page-desc{color:var(--muted);font-size:13px;margin:0 0 23px}
+
+/* dashboard */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:20px;
+}
+.stat-card{
+  background:#151515;border:1px solid #2c2c2c;border-radius:11px;padding:18px;
+}
+.stat-label{color:var(--muted);font-size:12px}
+.stat-value{font-family:"Space Grotesk";font-size:27px;font-weight:700;margin-top:7px}
+.stat-meta{font-size:11px;color:#777;margin-top:5px}
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:1.45fr 1fr;
+  gap:15px;
+}
+.card{
+  background:#141414;border:1px solid #2c2c2c;border-radius:11px;padding:18px;
+}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:"Space Grotesk";font-size:15px;font-weight:600}
+.card-sub{color:var(--muted);font-size:11px}
+.chart{
+  height:235px;
+  display:flex;align-items:flex-end;gap:14px;
+  padding:10px 4px 0;
+  border-bottom:1px solid #292929;
+  background:
+    repeating-linear-gradient(
+      to top,
+      transparent 0,
+      transparent 46px,
+      rgba(255,255,255,.035) 47px
+    );
+}
+.bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:8px}
+.bar{
+  width:min(42px,75%);
+  background:linear-gradient(to top,#a84d4d,var(--accent));
+  border-radius:5px 5px 0 0;
+  min-height:14px;
+}
+.bar-label{font-size:10px;color:#777}
+.activity-list{display:flex;flex-direction:column;gap:10px}
+.activity{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 0;border-bottom:1px solid #262626;
+}
+.activity:last-child{border-bottom:0}
+.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+.activity-main{flex:1}
+.activity-main strong{display:block;font-size:12.5px;font-weight:600}
+.activity-main span{display:block;font-size:10.5px;color:#777;margin-top:3px}
+.activity-time{font-size:10px;color:#777}
+
+/* ================= OPERATIONS / DELIVERY ================= */
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:15px;margin-bottom:10px;
+}
+.section-title{
+  display:flex;align-items:center;gap:16px;
+}
+.section-title h2{
+  font-family:"Space Grotesk";font-size:23px;margin:0;
+}
+.new-btn{
+  background:transparent;
+  color:var(--accent);
+  border:1px solid var(--accent);
+  border-radius:7px;
+  padding:7px 18px;
+  font-family:"Space Grotesk";
+  font-weight:600;
+}
+.new-btn:hover{background:rgba(255,119,119,.1)}
+.toolbar{
+  display:flex;align-items:center;gap:8px;
+  border-bottom:3px solid var(--accent);
+  padding-bottom:5px;
+}
+.search-box{
+  width:36px;height:32px;border:1px solid var(--accent);
+  border-radius:7px;background:transparent;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.search-box.open{width:240px;justify-content:flex-start;padding:0 9px;gap:6px}
+.search-box input{
+  width:100%;border:0;outline:0;background:transparent;color:#fff;
+  display:none;font-size:12px;
+}
+.search-box.open input{display:block}
+.view-btn{
+  width:36px;height:32px;border:1px solid var(--accent);
+  border-radius:7px;background:transparent;color:var(--accent);
+}
+.view-btn.active{background:rgba(255,119,119,.13)}
+.delivery-table-wrap{
+  border:1px solid var(--accent);
+  border-top:0;
+  border-radius:0 0 10px 10px;
+  overflow:hidden;
+}
+.delivery-table{
+  width:100%;border-collapse:collapse;
+  min-width:760px;
+}
+.delivery-table th{
+  text-align:left;padding:9px 9px;
+  color:#e8dede;font-size:12px;font-weight:500;
+  border-bottom:2px solid var(--accent);
+}
+.delivery-table td{
+  padding:10px 9px;
+  font-size:12.5px;
+  border-bottom:1px solid var(--line-soft);
+}
+.delivery-table tbody tr:hover{background:#181818}
+.delivery-table tbody tr:last-child td{border-bottom:0}
+.ref{color:var(--accent2);font-weight:600}
+.status{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;
+}
+.status:before{
+  content:"";width:7px;height:7px;border-radius:50%;background:currentColor;
+}
+.status.ready{color:var(--green)}
+.status.scheduled{color:var(--blue)}
+.status.progress{color:var(--yellow)}
+.status.delivered{color:#a9a9a9}
+
+.kanban{
+  display:none;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  border:1px solid var(--accent);
+  border-top:0;
+  padding:13px;
+  border-radius:0 0 10px 10px;
+}
+.kanban.show{display:grid}
+.k-column{background:#151515;border:1px solid #2e2e2e;border-radius:9px;padding:10px;min-height:320px}
+.k-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px}
+.k-count{color:#777}
+.k-card{
+  border:1px solid #343434;background:#1b1b1b;border-radius:8px;
+  padding:11px;margin-bottom:8px;
+}
+.k-card .ref{font-size:11px}
+.k-card p{font-size:11px;margin:6px 0;color:#ddd}
+.k-card small{font-size:10px;color:#777}
+
+.empty{
+  padding:70px 20px;text-align:center;color:#777;
+}
+
+/* ================= PRODUCTS / MOVES ================= */
+.data-card{
+  background:#141414;border:1px solid #2c2c2c;border-radius:11px;overflow:auto;
+}
+.simple-table{width:100%;border-collapse:collapse;min-width:650px}
+.simple-table th,.simple-table td{
+  text-align:left;padding:13px 15px;border-bottom:1px solid #292929;font-size:12.5px;
+}
+.simple-table th{color:#918585;font-weight:500}
+.simple-table td{color:#e5dddd}
+.badge{
+  padding:4px 8px;border-radius:5px;background:#222;color:#aaa;font-size:10px;
+}
+
+/* ================= SETTINGS / PROFILE ================= */
+.panel{
+  background:#141414;border:1px solid #2c2c2c;border-radius:11px;
+  padding:20px;max-width:650px;margin-bottom:16px;
+}
+.panel h3{
+  font-family:"Space Grotesk";font-size:15px;margin:0 0 18px;
+  padding-bottom:12px;border-bottom:1px solid #2b2b2b;
+}
+.row2{display:flex;gap:12px}
+.row2 .field{flex:1}
+.btn-save{
+  background:var(--accent);color:#180808;border:0;border-radius:7px;
+  padding:10px 17px;font-weight:700;font-size:13px;
+}
+.toggle-list{display:flex;flex-direction:column;gap:15px}
+.toggle-item{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.t-label{display:block;font-size:13px}
+.t-desc{display:block;color:#777;font-size:11px;margin-top:3px}
+.switch{width:38px;height:22px;border-radius:20px;border:1px solid #444;background:#222;position:relative;flex:none}
+.switch .knob{position:absolute;width:16px;height:16px;border-radius:50%;left:2px;top:2px;background:#777;transition:.15s}
+.switch.on{border-color:var(--accent);background:rgba(255,119,119,.18)}
+.switch.on .knob{left:18px;background:var(--accent)}
+.profile-head{display:flex;align-items:center;gap:15px;margin-bottom:22px}
+.big-avatar{
+  width:62px;height:62px;border-radius:50%;
+  background:var(--accent);color:#190808;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Space Grotesk";font-size:21px;font-weight:700;
+}
+.profile-head h3{margin:0 0 4px;font-family:"Space Grotesk"}
+.profile-head p{margin:0;color:#777;font-size:12px}
+
+/* ================= MODAL ================= */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);
+  z-index:100;align-items:center;justify-content:center;padding:20px;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  width:100%;max-width:510px;background:#151515;
+  border:1px solid var(--accent);border-radius:12px;padding:22px;
+  box-shadow:0 25px 70px rgba(0,0,0,.5);
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-head h3{font-family:"Space Grotesk";margin:0;font-size:18px}
+.close{
+  width:30px;height:30px;border:1px solid #444;background:#1b1b1b;
+  color:#bbb;border-radius:7px;
+}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:15px}
+.btn-secondary{
+  border:1px solid #444;background:#1c1c1c;color:#ddd;
+  border-radius:7px;padding:9px 15px;
+}
+
+/* toast */
+.toast{
+  position:fixed;right:22px;bottom:22px;
+  background:#191919;border:1px solid var(--accent);
+  color:#eee;padding:11px 15px;border-radius:8px;
+  font-size:12px;opacity:0;transform:translateY(10px);
+  pointer-events:none;transition:.2s;z-index:200;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* responsive */
+@media(max-width:1000px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .dashboard-grid{grid-template-columns:1fr}
+  .kanban{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .sidebar{
+    transform:translateX(-100%);
+    transition:.2s;
+    box-shadow:10px 0 35px rgba(0,0,0,.4);
+  }
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;width:100%}
+  .menu-btn{display:block;position:absolute;left:15px}
+  .topbar{justify-content:flex-end;padding:0 15px}
+  .page{padding:22px 15px 35px}
+  .stats{grid-template-columns:1fr 1fr}
+  .section-head{align-items:flex-start;flex-direction:column}
+  .toolbar{width:100%}
+  .search-box.open{flex:1;width:auto}
+  .delivery-table-wrap{overflow-x:auto}
+  .kanban{grid-template-columns:1fr}
+  .row2{flex-direction:column;gap:0}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr}
+  .user-area span{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH ================= -->
+<div id="auth">
+
+  <div class="auth-card show" id="card-login">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to manage your storage and delivery operations.</p>
+    <div class="field"><label>Email</label><input type="email" id="loginEmail"></div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pwd-wrap">
+        <input type="password" id="loginPass">
+        <span class="toggle-eye" onclick="togglePwd('loginPass',this)">show</span>
+      </div>
+    </div>
+    <div style="text-align:right;margin-bottom:14px">
+      <button class="btn-link" onclick="go('forgot')">Forgot password?</button>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign in</button>
+    <div class="msg err" id="loginMsg"></div>
+    <div class="auth-foot">No account? <button class="btn-link" onclick="go('signup')">Create one</button></div>
+    <div class="hint">Demo login — <b>demo@stocksense.io</b> / <b>demo1234</b></div>
+  </div>
+
+  <div class="auth-card" id="card-signup">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Create your account</h1>
+    <p class="sub">Set up access to your team's operations dashboard.</p>
+    <div class="field"><label>Full name</label><input type="text" id="suName"></div>
+    <div class="field"><label>Email</label><input type="email" id="suEmail"></div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pwd-wrap">
+        <input type="password" id="suPass">
+        <span class="toggle-eye" onclick="togglePwd('suPass',this)">show</span>
+      </div>
+    </div>
+    <div class="field"><label>Confirm password</label><input type="password" id="suConfirm"></div>
+    <button class="btn-primary" onclick="doSignup()">Create account</button>
+    <div class="msg err" id="signupMsg"></div>
+    <div class="auth-foot">Already have an account? <button class="btn-link" onclick="go('login')">Sign in</button></div>
+  </div>
+
+  <div class="auth-card" id="card-forgot">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Reset your password</h1>
+    <p class="sub">Enter your account email and we'll send a one-time code.</p>
+    <div class="field"><label>Email</label><input type="email" id="forgotEmail"></div>
+    <button class="btn-primary" onclick="sendOtp()">Send OTP</button>
+    <div class="msg err" id="forgotMsg"></div>
+    <div class="auth-foot"><button class="btn-link" onclick="go('login')">Back to sign in</button></div>
+  </div>
+
+  <div class="auth-card" id="card-otp">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Enter verification code</h1>
+    <p class="sub" id="otpSub">We sent a 6-digit code to your email.</p>
+    <div class="otp-row">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+      <input maxlength="1" inputmode="numeric">
+    </div>
+    <button class="btn-primary" onclick="verifyOtp()">Verify code</button>
+    <div class="msg err" id="otpMsg"></div>
+    <div class="auth-foot"><button class="btn-link" onclick="sendOtp(true)">Resend code</button></div>
+    <div class="hint">Demo code: <b>123456</b></div>
+  </div>
+
+  <div class="auth-card" id="card-reset">
+    <div class="auth-brand"><div class="mark">S</div><span>StockSense</span></div>
+    <h1>Set a new password</h1>
+    <p class="sub">Choose a new password for your account.</p>
+    <div class="field"><label>New password</label><input type="password" id="resetPass1"></div>
+    <div class="field"><label>Confirm new password</label><input type="password" id="resetPass2"></div>
+    <button class="btn-primary" onclick="doReset()">Reset password</button>
+    <div class="msg err" id="resetMsg"></div>
+  </div>
+
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="app-shell">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        StockSense
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">▦</span>Dashboard</button>
+        <button class="nav-item" data-view="operations"><span class="nav-icon">⇢</span>Operations</button>
+        <button class="nav-item" data-view="products"><span class="nav-icon">□</span>Products</button>
+        <button class="nav-item" data-view="moves"><span class="nav-icon">↕</span>Move History</button>
+        <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span>Settings</button>
+      </nav>
+
+      <button class="logout" onclick="doLogout()"><span>⏻</span>Log out</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="user-area">
+          <div class="avatar" id="topAvatar">D</div>
+          <span id="topName">Demo User</span>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section class="page" id="view-dashboard">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-desc">Overview of your storage and delivery operations.</p>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-label">Items in storage</div>
+            <div class="stat-value">1,284</div>
+            <div class="stat-meta">Across all warehouse zones</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Capacity used</div>
+            <div class="stat-value">76%</div>
+            <div class="stat-meta">24% capacity remaining</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active deliveries</div>
+            <div class="stat-value" id="dashDeliveries">4</div>
+            <div class="stat-meta">Currently being processed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Low stock alerts</div>
+            <div class="stat-value">12</div>
+            <div class="stat-meta">Require attention</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Delivery activity</div>
+                <div class="card-sub">Orders processed this week</div>
+              </div>
+            </div>
+            <div class="chart">
+              <div class="bar-wrap"><div class="bar" style="height:43%"></div><span class="bar-label">Mon</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:62%"></div><span class="bar-label">Tue</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:49%"></div><span class="bar-label">Wed</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:79%"></div><span class="bar-label">Thu</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:68%"></div><span class="bar-label">Fri</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:35%"></div><span class="bar-label">Sat</span></div>
+              <div class="bar-wrap"><div class="bar" style="height:25%"></div><span class="bar-label">Sun</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Recent activity</div>
+                <div class="card-sub">Latest operations</div>
+              </div>
+            </div>
+            <div class="activity-list">
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>WH/OUT/0002 ready</strong><span>Azure Interior</span></div>
+                <span class="activity-time">10m</span>
+              </div>
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>WH/OUT/0001 scheduled</strong><span>Vendor delivery</span></div>
+                <span class="activity-time">32m</span>
+              </div>
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>Product moved</strong><span>WH/Stock1 → WH/Stock2</span></div>
+                <span class="activity-time">1h</span>
+              </div>
+              <div class="activity">
+                <span class="activity-dot"></span>
+                <div class="activity-main"><strong>Low stock alert</strong><span>Product #1048</span></div>
+                <span class="activity-time">2h</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPERATIONS / DELIVERY -->
+      <section class="page" id="view-operations" style="display:none">
+        <div class="section-head">
+          <div class="section-title">
+            <button class="new-btn" onclick="openNewDelivery()">NEW</button>
+            <h2>Delivery</h2>
+          </div>
+
+          <div class="toolbar">
+            <button class="search-box" id="searchBtn" onclick="toggleSearch()" title="Search">⌕
+              <input id="deliverySearch" type="text" placeholder="Reference or contact..." oninput="renderDeliveries()">
+            </button>
+            <button class="view-btn active" id="listBtn" onclick="setDeliveryView('list')" title="List view">☷</button>
+            <button class="view-btn" id="kanbanBtn" onclick="setDeliveryView('kanban')" title="Kanban view">▦</button>
+          </div>
+        </div>
+
+        <div class="delivery-table-wrap" id="listView">
+          <table class="delivery-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Contact</th>
+                <th>Schedule date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="deliveryBody"></tbody>
+          </table>
+        </div>
+
+        <div class="kanban" id="kanbanView"></div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section class="page" id="view-products" style="display:none">
+        <h1 class="page-title">Products</h1>
+        <p class="page-desc">Manage products and their warehouse quantities.</p>
+
+        <div class="data-card">
+          <table class="simple-table">
+            <thead>
+              <tr><th>Product</th><th>SKU</th><th>Location</th><th>Quantity</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Office Chair</td><td>SKU-1001</td><td>WH/Stock1</td><td>248</td><td><span class="badge">In stock</span></td></tr>
+              <tr><td>Desk Lamp</td><td>SKU-1002</td><td>WH/Stock2</td><td>184</td><td><span class="badge">In stock</span></td></tr>
+              <tr><td>Monitor Stand</td><td>SKU-1003</td><td>WH/Stock1</td><td>74</td><td><span class="badge">Low stock</span></td></tr>
+              <tr><td>Keyboard</td><td>SKU-1004</td><td>WH/Stock3</td><td>319</td><td><span class="badge">In stock</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MOVE HISTORY -->
+      <section class="page" id="view-moves" style="display:none">
+        <h1 class="page-title">Move History</h1>
+        <p class="page-desc">Track inventory movements between warehouse locations.</p>
+
+        <div class="data-card">
+          <table class="simple-table">
+            <thead>
+              <tr><th>Reference</th><th>Product</th><th>From</th><th>To</th><th>Date</th><th>User</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="ref">WH/MOVE/0012</td><td>Office Chair</td><td>WH/Stock1</td><td>WH/Stock2</td><td>26 Sep 2026</td><td>Demo User</td></tr>
+              <tr><td class="ref">WH/MOVE/0011</td><td>Desk Lamp</td><td>WH/Stock3</td><td>WH/Stock1</td><td>26 Sep 2026</td><td>Demo User</td></tr>
+              <tr><td class="ref">WH/MOVE/0010</td><td>Keyboard</td><td>WH/Stock2</td><td>WH/Stock3</td><td>25 Sep 2026</td><td>Operations</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="page" id="view-settings" style="display:none">
+        <h1 class="page-title">Settings</h1>
+        <p class="page-desc">Manage account security and application preferences.</p>
+
+        <div class="panel">
+          <h3>Change password</h3>
+          <div class="field"><label>Current password</label><input type="password"></div>
+          <div class="row2">
+            <div class="field"><label>New password</label><input type="password"></div>
+            <div class="field"><label>Confirm new password</label><input type="password"></div>
+          </div>
+          <button class="btn-save" onclick="toast('Password update saved.')">Update password</button>
+        </div>
+
+        <div class="panel">
+          <h3>Preferences</h3>
+          <div class="toggle-list">
+            <div class="toggle-item">
+              <div><span class="t-label">Email notifications</span><span class="t-desc">Receive delivery and low-stock alerts</span></div>
+              <div class="switch on" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+            </div>
+            <div class="toggle-item">
+              <div><span class="t-label">Two-factor authentication</span><span class="t-desc">Require an OTP during sign in</span></div>
+              <div class="switch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Profile</h3>
+          <div class="profile-head">
+            <div class="big-avatar" id="profAvatar">D</div>
+            <div><h3 id="profName">Demo User</h3><p>Team member · Operations</p></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Full name</label><input id="pfName" value="Demo User"></div>
+            <div class="field"><label>Email</label><input id="pfEmail" value="demo@stocksense.io"></div>
+          </div>
+          <div class="field"><label>Phone</label><input id="pfPhone" placeholder="+91 00000 00000"></div>
+          <button class="btn-save" onclick="saveProfile()">Save changes</button>
+          <div class="msg ok" id="profMsg"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ================= NEW DELIVERY MODAL ================= -->
+<div class="modal-backdrop" id="deliveryModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Create new delivery</h3>
+      <button class="close" onclick="closeNewDelivery()">×</button>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>From</label>
+        <input id="newFrom" value="WH/Stock1">
+      </div>
+      <div class="field">
+        <label>To</label>
+        <input id="newTo" value="Vendor">
+      </div>
+    </div>
+
+    <div class="field"><label>Contact</label><input id="newContact" placeholder="Customer / vendor contact"></div>
+
+    <div class="row2">
+      <div class="field"><label>Schedule date</label><input type="date" id="newDate"></div>
+      <div class="field">
+        <label>Status</label>
+        <select id="newStatus">
+          <option value="Ready">Ready</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="In Progress">In Progress</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeNewDelivery()">Cancel</button>
+      <button class="new-btn" onclick="createDelivery()">Create delivery</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= AUTH ================= */
+let pendingEmail = '';
+
+function go(name){
+  document.querySelectorAll('.auth-card').forEach(c => c.classList.remove('show'));
+  const card = document.getElementById('card-' + name);
+  if(card) card.classList.add('show');
+}
+
+function togglePwd(id,el){
+  const input=document.getElementById(id);
+  const isPwd=input.type==='password';
+  input.type=isPwd?'text':'password';
+  el.textContent=isPwd?'hide':'show';
+}
+
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const msg=document.getElementById('loginMsg');
+
+  if(email==='demo@stocksense.io' && pass==='demo1234'){
+    msg.textContent='';
+    enterApp(email,'Demo User');
+  }else{
+    msg.textContent='Incorrect email or password.';
+  }
+}
+
+function doSignup(){
+  const name=document.getElementById('suName').value.trim();
+  const email=document.getElementById('suEmail').value.trim();
+  const p1=document.getElementById('suPass').value;
+  const p2=document.getElementById('suConfirm').value;
+  const msg=document.getElementById('signupMsg');
+
+  if(!name || !email || !p1){msg.textContent='Please fill in every field.';return}
+  if(p1.length<8){msg.textContent='Password must be at least 8 characters.';return}
+  if(p1!==p2){msg.textContent='Passwords do not match.';return}
+
+  msg.textContent='';
+  enterApp(email,name);
+}
+
+function sendOtp(resend=false){
+  const email=document.getElementById('forgotEmail').value.trim() || pendingEmail;
+  if(!resend && !email){
+    document.getElementById('forgotMsg').textContent='Enter your account email.';
+    return;
+  }
+
+  pendingEmail=email;
+  document.getElementById('otpSub').textContent='We sent a 6-digit code to '+email;
+  const msg=document.getElementById('otpMsg');
+  msg.className='msg ok';
+  msg.textContent=resend?'A new code has been sent.':'';
+  go('otp');
+
+  document.querySelectorAll('.otp-row input').forEach(i=>i.value='');
+  document.querySelector('.otp-row input').focus();
+}
+
+document.addEventListener('input',e=>{
+  if(e.target.closest('.otp-row') && e.target.value){
+    const inputs=[...document.querySelectorAll('.otp-row input')];
+    const index=inputs.indexOf(e.target);
+    if(index<inputs.length-1) inputs[index+1].focus();
+  }
+});
+
+function verifyOtp(){
+  const code=[...document.querySelectorAll('.otp-row input')].map(i=>i.value).join('');
+  const msg=document.getElementById('otpMsg');
+
+  if(code==='123456'){
+    msg.className='msg ok';
+    msg.textContent='';
+    go('reset');
+  }else{
+    msg.className='msg err';
+    msg.textContent='Incorrect code. Try again.';
+  }
+}
+
+function doReset(){
+  const p1=document.getElementById('resetPass1').value;
+  const p2=document.getElementById('resetPass2').value;
+  const msg=document.getElementById('resetMsg');
+
+  if(p1.length<8){msg.textContent='Password must be at least 8 characters.';return}
+  if(p1!==p2){msg.textContent='Passwords do not match.';return}
+
+  msg.className='msg ok';
+  msg.textContent='Password updated. Redirecting to sign in...';
+  setTimeout(()=>go('login'),1200);
+}
+
+function enterApp(email,name){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='block';
+
+  const initial=(name || email || 'U').trim()[0].toUpperCase();
+  document.getElementById('topAvatar').textContent=initial;
+  document.getElementById('topName').textContent=name || email;
+  document.getElementById('profAvatar').textContent=initial;
+  document.getElementById('profName').textContent=name || email;
+  document.getElementById('pfName').value=name || '';
+  document.getElementById('pfEmail').value=email || '';
+
+  showView('dashboard');
+}
+
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='flex';
+  go('login');
+}
+
+/* ================= NAVIGATION ================= */
+function showView(name){
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.classList.toggle('active',item.dataset.view===name);
+  });
+
+  document.querySelectorAll('.page').forEach(page=>{
+    page.style.display=page.id==='view-'+name?'block':'none';
+  });
+
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>showView(item.dataset.view));
+});
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ================= DELIVERY DATA ================= */
+let deliveries=[
+  {
+    reference:'WH/OUT/0001',
+    from:'WH/Stock1',
+    to:'vendor',
+    contact:'Azure Interior',
+    date:'26 Sep 2026',
+    status:'Ready'
+  },
+  {
+    reference:'WH/OUT/0002',
+    from:'WH/Stock1',
+    to:'vendor',
+    contact:'Azure Interior',
+    date:'26 Sep 2026',
+    status:'Ready'
+  },
+  {
+    reference:'WH/OUT/0003',
+    from:'WH/Stock2',
+    to:'customer',
+    contact:'Deco Addict',
+    date:'27 Sep 2026',
+    status:'Scheduled'
+  },
+  {
+    reference:'WH/OUT/0004',
+    from:'WH/Stock1',
+    to:'customer',
+    contact:'Lumber Inc.',
+    date:'27 Sep 2026',
+    status:'In Progress'
+  },
+  {
+    reference:'WH/OUT/0005',
+    from:'WH/Stock3',
+    to:'vendor',
+    contact:'Ready Mat',
+    date:'28 Sep 2026',
+    status:'Delivered'
+  }
+];
+
+function statusClass(status){
+  if(status==='Ready')return'ready';
+  if(status==='Scheduled')return'scheduled';
+  if(status==='In Progress')return'progress';
+  return'delivered';
+}
+
+function renderDeliveries(){
+  const query=(document.getElementById('deliverySearch').value||'').trim().toLowerCase();
+
+  const filtered=deliveries.filter(d=>
+    d.reference.toLowerCase().includes(query) ||
+    d.contact.toLowerCase().includes(query)
+  );
+
+  const body=document.getElementById('deliveryBody');
+
+  if(!filtered.length){
+    body.innerHTML='<tr><td colspan="6" class="empty">No delivery orders found.</td></tr>';
+  }else{
+    body.innerHTML=filtered.map(d=>`
+      <tr>
+        <td class="ref">${d.reference}</td>
+        <td>${d.from}</td>
+        <td>${d.to}</td>
+        <td>${d.contact}</td>
+        <td>${d.date}</td>
+        <td><span class="status ${statusClass(d.status)}">${d.status}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  renderKanban(filtered);
+  document.getElementById('dashDeliveries').textContent=
+    deliveries.filter(d=>d.status!=='Delivered').length;
+}
+
+function renderKanban(data=deliveries){
+  const columns=[
+    ['Ready','ready'],
+    ['Scheduled','scheduled'],
+    ['In Progress','progress'],
+    ['Delivered','delivered']
+  ];
+
+  document.getElementById('kanbanView').innerHTML=columns.map(([name,cls])=>{
+    const items=data.filter(d=>d.status===name);
+
+    return `
+      <div class="k-column">
+        <div class="k-head">
+          <strong>${name}</strong>
+          <span class="k-count">${items.length}</span>
+        </div>
+        ${items.length ? items.map(d=>`
+          <div class="k-card">
+            <div class="ref">${d.reference}</div>
+            <p>${d.contact}</p>
+            <small>${d.from} → ${d.to}</small><br>
+            <small>${d.date}</small>
+          </div>
+        `).join('') : '<div style="font-size:11px;color:#666;padding:20px 3px">No deliveries</div>'}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleSearch(){
+  const box=document.getElementById('searchBtn');
+  box.classList.toggle('open');
+
+  if(box.classList.contains('open')){
+    document.getElementById('deliverySearch').focus();
+  }else{
+    document.getElementById('deliverySearch').value='';
+    renderDeliveries();
+  }
+}
+
+function setDeliveryView(type){
+  const list=document.getElementById('listView');
+  const kanban=document.getElementById('kanbanView');
+  const listBtn=document.getElementById('listBtn');
+  const kanbanBtn=document.getElementById('kanbanBtn');
+
+  if(type==='list'){
+    list.style.display='block';
+    kanban.classList.remove('show');
+    listBtn.classList.add('active');
+    kanbanBtn.classList.remove('active');
+  }else{
+    list.style.display='none';
+    kanban.classList.add('show');
+    listBtn.classList.remove('active');
+    kanbanBtn.classList.add('active');
+  }
+}
+
+/* ================= NEW DELIVERY ================= */
+function openNewDelivery(){
+  document.getElementById('deliveryModal').classList.add('show');
+
+  const d=new Date();
+  d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+  document.getElementById('newDate').value=d.toISOString().slice(0,10);
+}
+
+function closeNewDelivery(){
+  document.getElementById('deliveryModal').classList.remove('show');
+}
+
+function createDelivery(){
+  const from=document.getElementById('newFrom').value.trim() || 'WH/Stock1';
+  const to=document.getElementById('newTo').value.trim() || 'vendor';
+  const contact=document.getElementById('newContact').value.trim() || 'New Contact';
+  const dateValue=document.getElementById('newDate').value;
+  const status=document.getElementById('newStatus').value;
+
+  if(!dateValue){
+    toast('Please select a schedule date.');
+    return;
+  }
+
+  const date=new Date(dateValue+'T00:00:00');
+  const formatted=date.toLocaleDateString('en-GB',{
+    day:'2-digit',month:'short',year:'numeric'
+  });
+
+  const number=String(deliveries.length+1).padStart(4,'0');
+
+  deliveries.unshift({
+    reference:'WH/OUT/'+number,
+    from,to,contact,
+    date:formatted,
+    status
+  });
+
+  closeNewDelivery();
+  renderDeliveries();
+  toast('Delivery created successfully.');
+}
+
+/* ================= PROFILE / TOAST ================= */
+function saveProfile(){
+  const name=document.getElementById('pfName').value.trim() || 'Demo User';
+  const email=document.getElementById('pfEmail').value.trim() || 'demo@stocksense.io';
+
+  document.getElementById('topName').textContent=name;
+  document.getElementById('profName').textContent=name;
+
+  const initial=name[0].toUpperCase();
+  document.getElementById('topAvatar').textContent=initial;
+  document.getElementById('profAvatar').textContent=initial;
+
+  const msg=document.getElementById('profMsg');
+  msg.textContent='Profile saved.';
+  setTimeout(()=>msg.textContent='',2000);
+}
+
+function toast(message){
+  const t=document.getElementById('toast');
+  t.textContent=message;
+  t.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+document.getElementById('deliveryModal').addEventListener('click',e=>{
+  if(e.target.id==='deliveryModal') closeNewDelivery();
+});
+
+/* initial render */
+renderDeliveries();
+</script>
+
+</body>
+</html>
