@@ -56,3 +56,19 @@ async def validate_delivery(delivery_id: str):
         {"$set": {"status": "Done", "validated_at": datetime.utcnow()}}
     )
     return {"message": "Delivery validated", "id": delivery_id}
+
+
+@router.patch("/{delivery_id}/status")
+async def update_delivery_status(delivery_id: str, new_status: str):
+    valid_transitions = {"Draft": "Waiting", "Waiting": "Ready", "Ready": "Done"}
+    delivery = await deliveries_collection.find_one({"_id": ObjectId(delivery_id)})
+    if not delivery:
+        raise HTTPException(status_code=404, detail="Not found")
+    if new_status not in ["Waiting", "Ready"]:
+        raise HTTPException(status_code=400, detail="Invalid status for this endpoint")
+
+    await deliveries_collection.update_one(
+        {"_id": ObjectId(delivery_id)},
+        {"$set": {"status": new_status}}
+    )
+    return {"message": f"Delivery marked as {new_status}", "id": delivery_id}
