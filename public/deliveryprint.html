@@ -800,7 +800,7 @@ a{text-decoration:none;color:inherit}
         <div class="stats">
           <button class="stat-card stat-clickable" data-summary="storage" onclick="showDashboardSummary('storage')">
             <div class="stat-label">Items in storage</div>
-            <div class="stat-value">1,284</div>
+            <div class="stat-value" id="dashTotalItems">0</div>
             <div class="stat-meta">Across all warehouse zones · Click for details</div>
           </button>
           <button class="stat-card stat-clickable" data-summary="capacity" onclick="showDashboardSummary('capacity')">
@@ -815,7 +815,7 @@ a{text-decoration:none;color:inherit}
           </button>
           <button class="stat-card stat-clickable" data-summary="stock" onclick="showDashboardSummary('stock')">
             <div class="stat-label">Low stock alerts</div>
-            <div class="stat-value">12</div>
+            <div class="stat-value" id="dashLowStock">0</div>
             <div class="stat-meta">Require attention · Click for details</div>
           </button>
         </div>
@@ -1226,6 +1226,7 @@ function showView(name){
   }
 
   if(name==='products') renderProducts();
+  if(name==='dashboard') updateDashboardFromProducts();
 
   document.getElementById('sidebar').classList.remove('open');
 }
@@ -2399,6 +2400,7 @@ window.addEventListener('storage', event=>{
 /* initial render */
 renderDeliveries();
 renderProducts();
+updateDashboardFromProducts();
 </script>
 
 </body>
