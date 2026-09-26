@@ -1,323 +1,799 @@
-* { box-sizing: border-box; }
+/* =========================================
+   STOCKSENSE - MAIN ERP STYLE
+   ========================================= */
 
-:root {
-  --bg: #f7f7f6;
-  --surface: #fff;
-  --text: #262a2f;
-  --muted: #777d84;
-  --line: #dfe2e5;
-  --strong: #25292e;
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f7f7f7;
+  color: #222;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  color: var(--text);
-  background: var(--bg);
+  min-height: 100vh;
 }
 
-button, input, select { font: inherit; }
+button,
+input,
+select {
+  font-family: inherit;
+}
 
-button { cursor: pointer; }
+button {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+/* =========================================
+   APPLICATION
+   ========================================= */
+
+.app {
+  min-height: 100vh;
+}
+
+
+/* =========================================
+   TOP NAVIGATION
+   ========================================= */
 
 .topbar {
-  height: 70px;
+  height: 58px;
+  background: #ffffff;
+  border-bottom: 1px solid #d9d9d9;
+
   display: flex;
   align-items: center;
-  padding: 0 38px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+
+  padding: 0 24px;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .brand {
-  font-weight: 700;
-  font-size: 20px;
-  margin-right: 38px;
+  font-size: 21px;
+  font-weight: 600;
+  margin-right: 42px;
+  color: #222;
 }
 
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 2px;
-  flex: 1;
+  gap: 4px;
+  height: 100%;
 }
 
 .main-nav > button,
 .nav-group > button {
-  border: 0;
+  height: 100%;
+
+  border: none;
   background: transparent;
-  color: var(--text);
-  padding: 25px 12px 23px;
-  border-bottom: 2px solid transparent;
+
+  padding: 0 15px;
+
+  font-size: 14px;
+  color: #444;
 }
 
 .main-nav > button:hover,
-.main-nav > button.active,
 .nav-group > button:hover {
-  border-bottom-color: var(--text);
+  background: #f3f3f3;
 }
 
-.nav-group { position: relative; }
+.main-nav > button.active {
+  color: #111;
+  font-weight: 600;
+  border-bottom: 2px solid #333;
+}
+
+
+/* =========================================
+   OPERATIONS DROPDOWN
+   ========================================= */
+
+.nav-group {
+  position: relative;
+  height: 100%;
+}
 
 .dropdown {
   position: absolute;
-  z-index: 10;
-  top: 59px;
+
+  top: 53px;
   left: 0;
-  width: 150px;
-  padding: 6px;
-  background: white;
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+
+  min-width: 150px;
+
+  background: #ffffff;
+
+  border: 1px solid #d6d6d6;
+  border-radius: 4px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+
+  padding: 5px;
+
+  z-index: 500;
 }
 
 .dropdown button {
   display: block;
+
   width: 100%;
-  padding: 10px;
-  border: 0;
-  background: white;
+
+  border: none;
+  background: #ffffff;
+
   text-align: left;
+
+  padding: 9px 11px;
+
+  font-size: 14px;
+  color: #333;
+
+  border-radius: 3px;
 }
 
-.dropdown button:hover { background: #f1f2f3; }
+.dropdown button:hover {
+  background: #f2f2f2;
+}
+
+
+/* =========================================
+   PROFILE
+   ========================================= */
 
 .avatar {
+  margin-left: auto;
+
   width: 34px;
   height: 34px;
+
   border-radius: 50%;
-  border: 1px solid var(--line);
-  background: white;
+
+  border: 1px solid #cfcfcf;
+  background: #f3f3f3;
+
+  font-weight: 600;
 }
+
+
+/* =========================================
+   MAIN PAGE
+   ========================================= */
 
 .page {
-  width: min(1120px, calc(100% - 48px));
-  margin: 38px auto 60px;
+  max-width: 1180px;
+
+  margin: 0 auto;
+
+  padding: 35px 32px 60px;
 }
 
-.title-row,
-.section-top {
+
+/* =========================================
+   PAGE TITLE
+   ========================================= */
+
+.title-row {
   display: flex;
+
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 15px;
+
+  margin-bottom: 22px;
 }
 
 .small-label {
-  color: var(--muted);
+  color: #777;
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
+
   margin-bottom: 5px;
 }
 
-h1, h2 { margin: 0; }
+h1 {
+  margin: 0;
 
-h1 { font-size: 30px; font-weight: 600; }
-h2 { font-size: 22px; font-weight: 600; }
-
-.search-button {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--line);
-  background: white;
-  border-radius: 5px;
-  font-size: 24px;
+  font-size: 27px;
+  font-weight: 600;
 }
 
-.search-box { padding: 14px 0; }
+h2 {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   SEARCH
+   ========================================= */
+
+.stock-toolbar {
+  display: flex;
+  align-items: center;
+}
+
+.search-button {
+  border: 1px solid #c9c9c9;
+
+  background: #ffffff;
+
+  color: #333;
+
+  padding: 8px 14px;
+
+  border-radius: 4px;
+
+  font-size: 14px;
+}
+
+.search-button:hover {
+  background: #f3f3f3;
+}
+
+.search-box {
+  margin-bottom: 18px;
+}
 
 .search-box input {
   width: 100%;
-  padding: 11px 12px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
+  max-width: 430px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #cfcfcf;
+
+  border-radius: 4px;
+
+  background: #fff;
+
+  font-size: 14px;
+
   outline: none;
 }
 
+.search-box input:focus {
+  border-color: #777;
+}
+
+
+/* =========================================
+   STOCK TABLE
+   ========================================= */
+
 .table-wrap {
-  margin-top: 17px;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 5px;
+  width: 100%;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+
+  border-radius: 4px;
+
   overflow: hidden;
 }
 
 table {
   width: 100%;
+
   border-collapse: collapse;
 }
 
-th, td {
-  padding: 14px 18px;
-  text-align: left;
-  border-bottom: 1px solid var(--line);
+thead {
+  background: #f5f5f5;
 }
 
 th {
-  color: var(--muted);
-  font-size: 13px;
+  text-align: left;
+
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #d9d9d9;
+
+  font-size: 12px;
+
   font-weight: 600;
+
+  color: #555;
+
+  white-space: nowrap;
 }
 
-td { font-size: 14px; }
+td {
+  padding: 13px 14px;
 
-.update-link {
-  border: 0;
-  background: transparent;
-  text-decoration: underline;
-  color: var(--text);
+  border-bottom: 1px solid #ededed;
+
+  font-size: 14px;
+
+  vertical-align: middle;
 }
 
-.empty, .note {
-  color: var(--muted);
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #fafafa;
+}
+
+
+/* =========================================
+   PRODUCT INFORMATION
+   ========================================= */
+
+.product-name {
+  font-weight: 500;
+
+  color: #222;
+}
+
+.product-sku {
+  margin-top: 4px;
+
+  color: #777;
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   UPDATE BUTTON
+   ========================================= */
+
+.update-button {
+  border: 1px solid #c7c7c7;
+
+  background: #ffffff;
+
+  color: #333;
+
+  padding: 6px 12px;
+
+  border-radius: 4px;
+
   font-size: 13px;
 }
+
+.update-button:hover {
+  background: #f1f1f1;
+}
+
+
+/* =========================================
+   STOCK STATUS
+   ========================================= */
+
+.stock-status {
+  display: inline-block;
+
+  padding: 5px 10px;
+
+  border-radius: 12px;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.status-in-stock {
+  background: #e8f5e9;
+  color: #28733a;
+}
+
+.status-low-stock {
+  background: #fff3d4;
+  color: #856000;
+}
+
+.status-out-stock {
+  background: #fde8e8;
+  color: #a52a2a;
+}
+
+
+/* =========================================
+   EMPTY STATE
+   ========================================= */
 
 .empty {
-  padding: 35px;
+  padding: 30px;
+
   text-align: center;
+
+  color: #777;
+
+  font-size: 14px;
 }
 
-.note { margin-top: 15px; }
+
+/* =========================================
+   NOTE
+   ========================================= */
+
+.note {
+  margin-top: 12px;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   DELIVERY PREVIEW
+   ========================================= */
 
 .delivery-preview {
-  margin-top: 45px;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 22px;
+  margin-top: 35px;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+
+  border-radius: 4px;
+
+  padding: 25px;
+}
+
+.section-top {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 22px;
+}
+
+.outline-button {
+  border: 1px solid #bbb;
+
+  background: #fff;
+
+  padding: 7px 15px;
+
+  border-radius: 4px;
 }
 
 .delivery-actions {
   display: flex;
+
   align-items: center;
+
   gap: 8px;
-  padding: 15px 0;
-  border-bottom: 1px solid var(--line);
+
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid #e2e2e2;
 }
 
-.delivery-actions button,
-.outline-button,
-.form-actions button {
-  border: 1px solid var(--strong);
-  background: white;
-  padding: 8px 15px;
-  border-radius: 5px;
+.delivery-actions button {
+  border: 1px solid #c9c9c9;
+
+  background: #fff;
+
+  padding: 7px 13px;
+
+  border-radius: 4px;
+}
+
+.delivery-actions button:hover {
+  background: #f4f4f4;
 }
 
 .status-flow {
   margin-left: auto;
-  border: 1px solid var(--strong);
-  border-radius: 5px;
-  padding: 8px 16px;
+
+  color: #777;
+
+  font-size: 13px;
 }
 
-.delivery-details { padding: 28px 5px; }
+.delivery-details {
+  padding: 20px 0;
+}
 
 .reference {
-  font-size: 19px;
+  font-size: 18px;
+
   font-weight: 600;
-  margin-bottom: 25px;
+
+  margin-bottom: 18px;
 }
 
 .detail-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px 55px;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 18px 25px;
 }
 
-.detail-grid label,
-form label {
-  color: var(--muted);
+.detail-grid label {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
   font-size: 13px;
+
+  color: #555;
 }
 
 .detail-grid input,
-.detail-grid select,
-form input {
-  display: block;
-  width: 100%;
-  margin-top: 7px;
-  padding: 9px 3px;
-  border: 0;
-  border-bottom: 1px solid var(--text);
-  outline: none;
-  background: transparent;
+.detail-grid select {
+  padding: 9px 10px;
+
+  border: 1px solid #ccc;
+
+  border-radius: 4px;
+
+  background: #fff;
 }
 
 .products-heading {
-  padding: 13px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  font-size: 16px;
+
   font-weight: 600;
+
+  margin: 15px 0 10px;
+}
+
+.delivery-table {
+  border: 1px solid #ddd;
 }
 
 .new-product-link {
-  margin-top: 14px;
-  border: 0;
+  margin-top: 12px;
+
+  border: none;
+
   background: transparent;
-  color: var(--text);
+
+  color: #555;
+
+  padding: 5px 0;
+
   text-decoration: underline;
 }
 
+
+/* =========================================
+   STOCK UPDATE MODAL
+   ========================================= */
+
 .modal {
   position: fixed;
+
   inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(0,0,0,.4);
+
+  background: rgba(0, 0, 0, 0.35);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1000;
 }
 
 .modal-card {
-  width: min(460px, 100%);
+  width: 430px;
+
+  max-width: calc(100vw - 30px);
+
+  background: #ffffff;
+
+  border-radius: 5px;
+
+  border: 1px solid #d5d5d5;
+
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+
   padding: 24px;
-  background: white;
-  border-radius: 7px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.2);
 }
 
 .modal-top {
   display: flex;
+
+  align-items: flex-start;
+
   justify-content: space-between;
+
   margin-bottom: 24px;
 }
 
 .close {
-  border: 0;
-  background: transparent;
-  font-size: 25px;
+  width: 30px;
+  height: 30px;
+
+  border: 1px solid #d0d0d0;
+
+  background: #fff;
+
+  border-radius: 4px;
+
+  font-size: 18px;
+
+  line-height: 1;
 }
 
-form label {
-  display: block;
-  margin-bottom: 18px;
+.close:hover {
+  background: #f3f3f3;
+}
+
+#stockForm {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 17px;
+}
+
+#stockForm label {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+  font-size: 13px;
+
+  color: #555;
+}
+
+#stockForm input {
+  padding: 10px;
+
+  border: 1px solid #cfcfcf;
+
+  border-radius: 4px;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+#stockForm input:focus {
+  border-color: #777;
 }
 
 .form-actions {
   display: flex;
+
   justify-content: flex-end;
+
   gap: 8px;
+
+  margin-top: 5px;
 }
 
-.form-actions button:last-child {
-  background: var(--strong);
-  color: white;
+.form-actions button {
+  padding: 8px 14px;
+
+  border-radius: 4px;
+
+  border: 1px solid #c9c9c9;
+
+  background: #fff;
 }
 
-.error { color: #b42318; font-size: 13px; }
+.form-actions button[type="submit"] {
+  background: #333;
 
-.hidden { display: none !important; }
+  color: #fff;
 
-@media (max-width: 760px) {
-  .topbar { padding: 0 14px; }
-  .brand { margin-right: 10px; }
-  .main-nav { overflow-x: auto; }
-  .main-nav > button, .nav-group > button { white-space: nowrap; }
-  .page { width: calc(100% - 24px); }
-  .detail-grid { grid-template-columns: 1fr; }
-  .status-flow { margin-left: 0; }
-  .delivery-actions { flex-wrap: wrap; }
+  border-color: #333;
+}
+
+.form-actions button[type="submit"]:hover {
+  background: #222;
+}
+
+.error {
+  color: #b3261e;
+
+  font-size: 13px;
+
+  margin: 0;
+}
+
+
+/* =========================================
+   SUCCESS NOTIFICATION
+   ========================================= */
+
+.stock-notification {
+  position: fixed;
+
+  right: 24px;
+
+  bottom: 24px;
+
+  background: #222;
+
+  color: #fff;
+
+  padding: 11px 17px;
+
+  border-radius: 5px;
+
+  font-size: 14px;
+
+  opacity: 0;
+
+  transform: translateY(10px);
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+
+  z-index: 2000;
+}
+
+.stock-notification.show {
+  opacity: 1;
+
+  transform: translateY(0);
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 800px) {
+
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .brand {
+    margin-right: 12px;
+  }
+
+  .main-nav > button,
+  .nav-group > button {
+    padding: 0 8px;
+  }
+
+  .page {
+    padding: 25px 15px 40px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 750px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-flow {
+    display: none;
+  }
 }
