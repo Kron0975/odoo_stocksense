@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockSense</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="topbar">
+      <div class="brand">StockSense</div>
+
+      <nav class="main-nav">
+        <button data-page="dashboard">Dashboard</button>
+
+        <div class="nav-group">
+          <button id="operationsBtn">Operations ▾</button>
+          <div id="operationsMenu" class="dropdown hidden">
+            <button>Receipts</button>
+            <button id="deliveryOption">Delivery</button>
+            <button>Adjustment</button>
+          </div>
+        </div>
+
+        <button class="active" data-page="stock">Products</button>
+        <button data-page="move-history">Move History</button>
+        <button data-page="settings">Settings</button>
+      </nav>
+
+      <button class="avatar">A</button>
+    </header>
+
+    <main class="page">
+
+      <section class="title-row">
+        <div>
+          <div class="small-label">Products / Inventory</div>
+          <h1>Stock</h1>
+        </div>
+
+        <button class="search-button" id="searchButton" title="Search">⌕</button>
+      </section>
+
+      <section id="searchBox" class="search-box hidden">
+        <input id="searchInput" type="search" placeholder="Search by product or SKU">
+      </section>
+
+      <section class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Per Unit Cost</th>
+              <th>On Hand</th>
+              <th>Free to Use</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="productRows"></tbody>
+        </table>
+
+        <div id="emptyState" class="empty hidden">No products found.</div>
+      </section>
+
+      <p class="note">User must be able to update the stock from here.</p>
+
+      <section id="deliveryPreview" class="delivery-preview hidden">
+        <div class="section-top">
+          <div>
+            <div class="small-label">Operations</div>
+            <h2>Delivery</h2>
+          </div>
+          <button class="outline-button">NEW</button>
+        </div>
+
+        <div class="delivery-actions">
+          <button>Validate</button>
+          <button>Print</button>
+          <button>Cancel</button>
+          <span class="status-flow">Draft &gt; Waiting &gt; Ready &gt; Done</span>
+        </div>
+
+        <div class="delivery-details">
+          <div class="reference">WH/OUT/0001</div>
+
+          <div class="detail-grid">
+            <label>Delivery Address<input placeholder=""></label>
+            <label>Schedule Date<input type="date"></label>
+            <label>Responsible<input placeholder=""></label>
+            <label>Operation Type<select><option>Delivery</option></select></label>
+          </div>
+        </div>
+
+        <div class="products-heading">Products</div>
+        <table class="delivery-table">
+          <thead>
+            <tr><th>Product</th><th>Quantity</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>[DESK001] Desk</td><td>6</td></tr>
+          </tbody>
+        </table>
+
+        <button class="new-product-link">New Product</button>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="stockModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-top">
+        <div>
+          <div class="small-label">Stock Update</div>
+          <h2 id="modalTitle">Update Stock</h2>
+        </div>
+        <button id="closeModal" class="close">×</button>
+      </div>
+
+      <form id="stockForm">
+        <label>On Hand
+          <input id="onHand" type="number" min="0" required>
+        </label>
+        <label>Free to Use
+          <input id="freeToUse" type="number" min="0" required>
+        </label>
+        <div class="form-actions">
+          <button type="button" id="cancelModal">Cancel</button>
+          <button type="submit">Update Stock</button>
+        </div>
+        <p id="formError" class="error"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
