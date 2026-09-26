@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -6,7 +6,7 @@ from datetime import datetime
 class AdjustmentCreate(BaseModel):
     product_id: str
     location_id: str
-    change: float             # positive = stock in, negative = stock out
+    change: float = Field(ne=0, description="Must be non-zero; positive = stock in, negative = stock out")
     reason: str               # e.g. "Damaged", "Stocktake correction", "Expired"
     notes: Optional[str] = None
 

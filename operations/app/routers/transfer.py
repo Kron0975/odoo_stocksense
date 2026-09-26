@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 
 from app.database import transfers_collection
@@ -13,7 +13,8 @@ router = APIRouter(prefix="/transfers", tags=["Transfers"])
 async def create_transfer(payload: TransferCreate):
     """
     Move stock from one location to another.
-    Decrements source, increments destination — both ledger entries are written.
+    Decrements source, increments destination — both ledger entries written.
+    If destination update fails, source deduction is automatically reversed.
     """
     if payload.from_location_id == payload.to_location_id:
         raise HTTPException(
@@ -21,6 +22,9 @@ async def create_transfer(payload: TransferCreate):
             detail="Source and destination locations must be different"
         )
 
+    now = datetime.now(timezone.utc)
+
+    # Insert transfer record
     doc = {
         "product_id": payload.product_id,
         "from_location_id": payload.from_location_id,
@@ -28,35 +32,53 @@ async def create_transfer(payload: TransferCreate):
         "quantity": payload.quantity,
         "notes": payload.notes,
         "status": "completed",
-        "created_at": datetime.utcnow(),
+        "created_at": now,
     }
-
     result = await transfers_collection.insert_one(doc)
     ref_id = str(result.inserted_id)
 
-    # Deduct from source location
-    await adjust_stock(
-        product_id=payload.product_id,
-        location_id=payload.from_location_id,
-        change=-payload.quantity,
-        movement_type="Transfer",
-        ref_id=ref_id,
-    )
+    # Step 1: Deduct from source location
+    try:
+        await adjust_stock(
+            product_id=payload.product_id,
+            location_id=payload.from_location_id,
+            change=-payload.quantity,
+            movement_type="Transfer",
+            ref_id=ref_id,
+        )
+    except ValueError as e:
+        await transfers_collection.delete_one({"_id": ObjectId(ref_id)})
+        raise HTTPException(status_code=404, detail=str(e))
 
-    # Add to destination location
-    await adjust_stock(
-        product_id=payload.product_id,
-        location_id=payload.to_location_id,
-        change=payload.quantity,
-        movement_type="Transfer",
-        ref_id=ref_id,
-    )
+    # Step 2: Add to destination — if this fails, reverse the source deduction
+    try:
+        await adjust_stock(
+            product_id=payload.product_id,
+            location_id=payload.to_location_id,
+            change=payload.quantity,
+            movement_type="Transfer",
+            ref_id=ref_id,
+        )
+    except ValueError as e:
+        # Compensate: reverse the source deduction to avoid stock loss
+        await adjust_stock(
+            product_id=payload.product_id,
+            location_id=payload.from_location_id,
+            change=payload.quantity,   # put it back
+            movement_type="Transfer_Reversal",
+            ref_id=ref_id,
+        )
+        await transfers_collection.delete_one({"_id": ObjectId(ref_id)})
+        raise HTTPException(
+            status_code=404,
+            detail=f"Destination location error: {e}. Transfer reversed."
+        )
 
     return TransferResponse(
         id=ref_id,
         **payload.model_dump(),
         status="completed",
-        created_at=doc["created_at"],
+        created_at=now,
     )
 
 

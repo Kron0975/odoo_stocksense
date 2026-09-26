@@ -5,8 +5,8 @@ from datetime import datetime
 
 class DeliveryCreate(BaseModel):
     product_id: str
-    location_id: str          # destination warehouse/location
-    quantity: float
+    location_id: str
+    quantity: float = Field(gt=0, description="Must be greater than zero")
     supplier: Optional[str] = None
     notes: Optional[str] = None
 

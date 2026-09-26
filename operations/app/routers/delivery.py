@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 
 from app.database import deliveries_collection
@@ -13,7 +13,11 @@ router = APIRouter(prefix="/deliveries", tags=["Deliveries"])
 async def create_delivery(payload: DeliveryCreate):
     """
     Record an inbound delivery. Increases stock at the destination location.
+    Stock is updated first — if it fails, no orphan DB record is created.
     """
+    now = datetime.now(timezone.utc)
+
+    # Insert delivery record
     doc = {
         "product_id": payload.product_id,
         "location_id": payload.location_id,
@@ -21,26 +25,30 @@ async def create_delivery(payload: DeliveryCreate):
         "supplier": payload.supplier,
         "notes": payload.notes,
         "status": "received",
-        "created_at": datetime.utcnow(),
+        "created_at": now,
     }
-
     result = await deliveries_collection.insert_one(doc)
     ref_id = str(result.inserted_id)
 
     # Positive change — stock arrives at location
-    await adjust_stock(
-        product_id=payload.product_id,
-        location_id=payload.location_id,
-        change=payload.quantity,
-        movement_type="Delivery",
-        ref_id=ref_id,
-    )
+    try:
+        await adjust_stock(
+            product_id=payload.product_id,
+            location_id=payload.location_id,
+            change=payload.quantity,
+            movement_type="Delivery",
+            ref_id=ref_id,
+        )
+    except ValueError as e:
+        # Roll back the delivery record since stock update failed
+        await deliveries_collection.delete_one({"_id": ObjectId(ref_id)})
+        raise HTTPException(status_code=404, detail=str(e))
 
     return DeliveryResponse(
         id=ref_id,
         **payload.model_dump(),
         status="received",
-        created_at=doc["created_at"],
+        created_at=now,
     )
 
 
